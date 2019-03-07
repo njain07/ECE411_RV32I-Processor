@@ -1,3 +1,5 @@
+import rv32i_types::*;
+
 module if_id_reg
 (
   input logic           clk,
