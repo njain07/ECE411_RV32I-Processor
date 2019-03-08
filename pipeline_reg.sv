@@ -137,9 +137,11 @@ module ex_mem_reg
   input logic [31:0]  aluout_in,
                       rs2out_in,
                       bren_in,
+                      u_imm_in,
   output logic [31:0] aluout_out,
                       rs2out_out,
-                      bren_out
+                      bren_out,
+                      u_imm_out
 );
 
 logic [31:0] aluout, rs2out, bren;
@@ -150,6 +152,7 @@ begin
     aluout = 32'b0;
     rs2out = 32'b0;
     bren = 32'b0;
+    u_imm = 32'b0;
 end
 
 always_ff @(posedge clk)
@@ -160,6 +163,7 @@ begin
       rs2out <= rs2out_in;
       bren <= bren_in;
       controlw <= controlw_in;
+      u_imm <= u_imm_in;
     end
 end
 
@@ -169,6 +173,7 @@ begin
   rs2out_out = rs2out;
   bren_out = bren;
   controlw_out = controlw;
+  u_imm_out = u_imm;
 end
 
 endmodule : ex_mem_reg
@@ -185,9 +190,12 @@ module mem_wb_reg
   input logic [31:0]  aluout_in,
                       bren_in,
                       dmemout_in,
+                      u_imm_in,
   output logic [31:0] aluout_out,
                       bren_out,
-                      dmemout_out
+                      dmemout_out,
+                      u_imm_out,
+                      pcmuxsel
 );
 
 rv32i_control_word controlw;
@@ -198,7 +206,10 @@ begin
     aluout = 32'b0;
     bren = 32'b0;
     dmemout = 32'b0;
+    u_imm = 32'b0;
 end
+
+assign pcmuxsel = (controlw.opcode == op_jal) || (controlw.opcode == op_jalr) || (bren[0]);
 
 always_ff @(posedge clk)
 begin
@@ -208,6 +219,7 @@ begin
         bren <= bren_in;
         dmemout <= dmemout_in;
         controlw <= controlw_in;
+        u_imm <= u_imm_in;
     end
 end
 
@@ -217,6 +229,7 @@ begin
     bren_out = bren;
     dmemout_out = dmemout;
     controlw_out = controlw;
+    u_imm_out = u_imm;
 end
 
 endmodule : mem_wb_reg

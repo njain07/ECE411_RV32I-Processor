@@ -11,12 +11,13 @@ module cpu_datapath
 
 assign pc_plus4_out = pc_out + 4;
 assign mem_wdata = rs2_out;
+assign read_a = 1; //to be changed
 
 mux2 pcmux
 (
-    .sel(memwb_pcmux_sel), //not sure yet
+    .sel(memwb_pcmuxsel),
     .a(pc_plus4_out),
-    .b(memwb_alu_out),
+    .b(memwb_aluout),
     .f(pcmux_out)
 );
 
@@ -53,14 +54,15 @@ ir IR
 regfile regfile
 (
     .clk,
-    .load(controlw.load_regfile),
-    .in(memwb_reg_out),
+    .load(memwb_controlw.load_regfile),
+    .in(memwbmux_out),
     .src_a(rs1),
     .src_b(rs2),
     .dest(rd),
     .reg_a(rs1_out),
     .reg_b(rs2_out)
 );
+
 
 id_ex_reg id_ex
 (
@@ -146,20 +148,64 @@ ex_mem_reg ex_mem
 	.load(1), //to be changed
 	.controlw_in (idex_controlw),
 	.controlw_out(exmem_controlw),
-	.aluout_in   (alu_out),
-	.rs2out_in   (idex_rs2out),
-	.bren_in     ({ 31'd0, br_en }),
-	.aluout_out  (exmem_aluout),
-	.rs2out_out  (exmem_rs2out),
-	.bren_out    (exmem_bren)
-
+	.aluout_in(alu_out),
+	.rs2out_in(idex_rs2out),
+	.bren_in({ 31'd0, br_en }),
+	.u_imm_in(idex_u_imm),
+	.aluout_out(exmem_aluout),
+	.rs2out_out(exmem_rs2out),
+	.bren_out(exmem_bren),
+	.u_imm_out(exmem_u_imm)
 );
 
 /*
  * Memory
  */
 
+assign read_b = exmem_controlw.mem_read;
+assign write = exmem_controlw.mem_write;
+assign wmask = exmem_controlw.mem_wmask;
+assign address_b = exmem_aluout;
+assign wdata = exmem_rs2out;
 
+mem_wb_reg mem_wb
+(
+	.clk,
+	.load(1), //to be changed
+	.controlw_in (exmem_controlw),
+	.controlw_out(memwb_controlw),
+	.aluout_in(exmem_aluout),
+	.bren_in(exmem_bren),
+	.dmemout_in(rdata_b),
+	.u_imm_in(exmem_u_imm),
+	.aluout_out(memwb_aluout),
+	.bren_out(memwb_bren),
+	.dmemout_out(memwb_rdata),
+	.u_imm_out(memwb_u_imm)
+	.pcmuxsel(memwb_pcmuxsel)
+);
+
+/*
+ * Write back
+ */
+
+
+mux4 memwb_mux
+(
+	.sel(memwb_controlw.memwbmux_sel),
+	.a(memwb_aluout),
+	.b(memwb_bren),
+	.c(memwb_u_imm),
+	.d(memwb_rdata),
+	.f(memwbmux_out)
+);
+
+/* 
+ * TODO:
+ * 1. Verify that there are no race conditions in pipeline registers while r/w 
+ * 2. Incorporate data hazard handling logic
+ * 3. Stall on mem_resp
+ */ 
 
 
 

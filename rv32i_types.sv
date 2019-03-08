@@ -64,6 +64,10 @@ typedef struct packed {
     logic load_regfile;
     logic cmpmux_sel;
     logic alumux1_sel;
+    logic mem_read;
+    logic mem_write;
+    logic [3:0] memwbmux_sel; //same as regfilemux
+    logic [3:0] mem_wmask;
     logic [2:0] alumux2_sel;
 } rv32i_control_word
 
