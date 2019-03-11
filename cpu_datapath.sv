@@ -3,19 +3,27 @@ import rv32i_types::*;
 module cpu_datapath
 (
 	input logic 		clk,
+						memwb_pcmuxsel,
+						resp_a,
+						resp_b,
 
-	output logic 		read_a,
-	output logic [31:0]	address_a,
-	input logic			resp_a,
 	input logic	[31:0]	rdata_a,
+						rdata_b,
 
 	output logic		read_b,
 						write,
+						read_a,
+
 	output logic [3:0] 	wmask,
-	output logic [31:0]	address_b,
+	output logic [2:0] 	funct3,
+	output logic [7:0] 	funct7,
+
+	output logic [31:0]	address_a,
+						address_b,
 						wdata,
-	input logic 		resp_b,
-	input logic [31:0]	rdata_b
+						memwbmux_out,
+
+	output rv32i_control_word controlw
 );
 
 //Internal signals
@@ -35,12 +43,16 @@ logic [2:0] idex_funct3;
 logic [6:0] idex_funct7;
 logic [31:0] idex_i_imm, idex_s_imm, idex_b_imm, idex_u_imm, idex_j_imm;
 logic [31:0] idex_rs1out, idex_rs2out, idex_pc;
+logic [31:0] mem_wdata;
 //EX
 logic br_en;
 logic [31:0] cmpmux_out, alumux1_out, alumux2_out, alu_out;
 //EX_MEM
 logic [31:0] exmem_aluout, exmem_rs2out, exmem_bren, exmem_u_imm;
 //Mem
+logic [31:0] memwb_aluout, memwb_bren, memwb_rdata, memwb_u_imm;
+
+rv32i_control_word memwb_controlw, idex_controlw, exmem_controlw;
 
 /*
  * Instruction fetch
