@@ -2,21 +2,58 @@ import rv32i_types::*;
 
 module cpu_datapath
 (
+	input logic 		clk,
 
+	output logic 		read_a,
+	output logic [31:0]	address_a,
+	input logic			resp_a,
+	input logic	[31:0]	rdata_a,
+
+	output logic		read_b,
+						write,
+	output logic [3:0] 	wmask,
+	output logic [31:0]	address_b,
+						wdata,
+	input logic 		resp_b,
+	input logic [31:0]	rdata_b
 );
+
+//Internal signals
+//IF
+logic [31:0] pc_plus4, pcmux_out, pc_out;
+//IF_ID
+logic [31:0] ifid_instr, ifid_pc;
+//ID
+rv32i_opcode opcode;
+logic [2:0] funct3;
+logic [6:0] funct7;
+logic [31:0] i_imm, s_imm, b_imm, u_imm, j_imm;
+logic [4:0] rs1, rs2, rd;
+logic [31:0] rs1_out, rs2_out;
+//ID_EX
+logic [2:0] idex_funct3;
+logic [6:0] idex_funct7;
+logic [31:0] idex_i_imm, idex_s_imm, idex_b_imm, idex_u_imm, idex_j_imm;
+logic [31:0] idex_rs1out, idex_rs2out, idex_pc;
+//EX
+logic br_en;
+logic [31:0] cmpmux_out, alumux1_out, alumux2_out, alu_out;
+//EX_MEM
+logic [31:0] exmem_aluout, exmem_rs2out, exmem_bren, exmem_u_imm;
+//Mem
 
 /*
  * Instruction fetch
  */
 
-assign pc_plus4_out = pc_out + 4;
+assign pc_plus4 = pc_out + 4;
 assign mem_wdata = rs2_out;
 assign read_a = 1; //to be changed
 
 mux2 pcmux
 (
     .sel(memwb_pcmuxsel),
-    .a(pc_plus4_out),
+    .a(pc_plus4),
     .b(memwb_aluout),
     .f(pcmux_out)
 );
