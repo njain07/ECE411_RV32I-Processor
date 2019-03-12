@@ -5,6 +5,7 @@ module cpu_control
 	input rv32i_opcode opcode,
 	input logic [2:0] funct3,
 	input logic [6:0] funct7,
+	input logic [4:0] rd,
 
 	output rv32i_control_word cword
 );
@@ -17,6 +18,7 @@ begin
 	/* Default assignments */
 	cword.opcode = opcode;
 	cword.aluop = alu_add;
+	cword.rd = rd;
 	cword.load_regfile = 0;
 	cword.cmpmux_sel = 0;
 	cword.alumux1_sel = 0;

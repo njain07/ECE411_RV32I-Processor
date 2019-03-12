@@ -45,7 +45,8 @@ logic [31:0] exmem_aluout, exmem_rs2out, exmem_bren, exmem_u_imm;
 //Mem_WB
 logic [31:0] memwb_aluout, memwb_bren, memwb_rdata, memwb_u_imm;
 //WB
-logic [31:0] memwbmux_out, memwb_pcmuxsel;
+logic [31:0] memwbmux_out;
+logic 		 memwb_pcmuxsel;
 
 //Control
 rv32i_control_word controlw, idex_controlw, exmem_controlw, memwb_controlw;
@@ -75,7 +76,7 @@ mux2 pcmux
 pc_register pc
 (
     .clk,
-    .load(1), //needs to be changed
+    .load(1'b1), //needs to be changed
     .in(pcmux_out),
     .out(pc_out)
 );
@@ -83,7 +84,7 @@ pc_register pc
 if_id_reg if_id
 (
 	.clk,
-	.load(1), //to be changed for data hazards
+	.load(1'b1), //to be changed for data hazards
 	.instr_in(rdata_a),
 	.pc_in(pc_out),
 	.instr_out(ifid_instr),
@@ -98,7 +99,7 @@ ir IR
 (
    .*,
    .clk,
-   .load(1), //to be changed
+   .load(1'b1), //to be changed
    .in(ifid_instr)
 );
 
@@ -109,7 +110,7 @@ regfile regfile
     .in(memwbmux_out),
     .src_a(rs1),
     .src_b(rs2),
-    .dest(rd),
+    .dest(memwb_controlw.rd),
     .reg_a(rs1_out),
     .reg_b(rs2_out)
 );
@@ -118,7 +119,7 @@ regfile regfile
 id_ex_reg id_ex
 (
 	.clk,
-	.load(1), //to be changed
+	.load(1'b1), //to be changed
 	.controlw_in(controlw),
 	.controlw_out(idex_controlw),
 	.pc_in(ifid_pc),
@@ -190,13 +191,15 @@ mux8 alumux2
     .d(idex_s_imm),
     .e(idex_rs2out),
     .f(idex_j_imm),
+    .g(),
+    .h(),
     .q(alumux2_out)
 );
 
 ex_mem_reg ex_mem
 (
 	.clk,
-	.load(1), //to be changed
+	.load(1'b1), //to be changed
 	.controlw_in (idex_controlw),
 	.controlw_out(exmem_controlw),
 	.aluout_in(alu_out),
@@ -222,7 +225,7 @@ assign wdata = exmem_rs2out;
 mem_wb_reg mem_wb
 (
 	.clk,
-	.load(1), //to be changed
+	.load(1'b1), //to be changed
 	.controlw_in (exmem_controlw),
 	.controlw_out(memwb_controlw),
 	.aluout_in(exmem_aluout),

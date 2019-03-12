@@ -15,21 +15,22 @@ logic [31:0] wdata;
 // logic [31:0] write_data;
 // logic [31:0] write_address;
 // logic write;
-// logic [31:0] registers [32];
+logic [31:0] registers [32];
 logic halt;
 // logic [63:0] order;
 
 initial
 begin
     clk = 0;
-    order = 0;
+    //order = 0;
 end
 
 /* Clock generator */
 always #5 clk = ~clk;
 
 assign registers = dut.datapath.regfile.data;
-assign halt = dut.load_pc & (dut.datapath.pc_out == dut.datapath.pcmux_out);
+//assign halt = dut.datapath.load_pc & (dut.datapath.pc_out == dut.datapath.pcmux_out);
+assign halt = (dut.datapath.pc_out == dut.datapath.pcmux_out);
 
 always @(posedge clk)
 begin
@@ -52,9 +53,9 @@ mp3 dut
     .resp_a,
     .resp_b,
     .rdata_a,
-    .rdata_b
+    .rdata_b,
     .read_a,
-    .read_b
+    .read_b,
     .write,
     .wmask,
     .address_a,
@@ -68,9 +69,9 @@ magic_memory_dp memory
     .resp_a,
     .resp_b,
     .rdata_a,
-    .rdata_b
+    .rdata_b,
     .read_a,
-    .read_b
+    .read_b,
     .write,
     .wmask,
     .address_a,

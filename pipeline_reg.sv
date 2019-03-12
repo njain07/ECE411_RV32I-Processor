@@ -195,7 +195,7 @@ module mem_wb_reg
                       bren_out,
                       dmemout_out,
                       u_imm_out,
-                      pcmuxsel
+  output logic        pcmuxsel
 );
 
 rv32i_control_word controlw;
@@ -209,7 +209,7 @@ begin
     u_imm = 32'b0;
 end
 
-assign pcmuxsel = (controlw.opcode == op_jal) || (controlw.opcode == op_jalr) || (bren[0]);
+assign pcmuxsel = (controlw.opcode == op_jal) || (controlw.opcode == op_jalr) || (controlw.opcode == op_br && (bren[0]));
 
 always_ff @(posedge clk)
 begin
