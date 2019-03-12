@@ -17,7 +17,7 @@ module cpu_datapath
 
 	output logic [31:0]	address_a,
 											address_b,
-											wdata,
+											wdata
 );
 
 //Internal signals
@@ -37,7 +37,6 @@ logic [2:0] idex_funct3;
 logic [6:0] idex_funct7;
 logic [31:0] idex_i_imm, idex_s_imm, idex_b_imm, idex_u_imm, idex_j_imm;
 logic [31:0] idex_rs1out, idex_rs2out, idex_pc;
-logic [31:0] mem_wdata;
 //EX
 logic br_en;
 logic [31:0] cmpmux_out, alumux1_out, alumux2_out, alu_out;
@@ -46,7 +45,7 @@ logic [31:0] exmem_aluout, exmem_rs2out, exmem_bren, exmem_u_imm;
 //Mem_WB
 logic [31:0] memwb_aluout, memwb_bren, memwb_rdata, memwb_u_imm;
 //WB
-logic [31:0] memwbmux_out;
+logic [31:0] memwbmux_out, memwb_pcmuxsel;
 
 //Control
 rv32i_control_word controlw, idex_controlw, exmem_controlw, memwb_controlw;
@@ -56,8 +55,8 @@ rv32i_control_word controlw, idex_controlw, exmem_controlw, memwb_controlw;
  */
 
 assign pc_plus4 = pc_out + 4;
-assign mem_wdata = rs2_out;
 assign read_a = 1; //to be changed
+assign address_a = pc_out;
 
 cpu_control ctrl
 (
@@ -160,7 +159,7 @@ mux2 cmpmux
 
 cmp cmp
 (
-    .cmpop,
+    .cmpop(idex_controlw.cmpop),
     .a(idex_rs1out),
     .b(cmpmux_out),
     .f(br_en)
@@ -168,7 +167,7 @@ cmp cmp
 
 alu alu
 (
-    .aluop,
+    .aluop(idex_controlw.aluop),
     .a(alumux1_out),
     .b(alumux2_out),
     .f(alu_out)
@@ -233,7 +232,7 @@ mem_wb_reg mem_wb
 	.aluout_out(memwb_aluout),
 	.bren_out(memwb_bren),
 	.dmemout_out(memwb_rdata),
-	.u_imm_out(memwb_u_imm)
+	.u_imm_out(memwb_u_imm),
 	.pcmuxsel(memwb_pcmuxsel)
 );
 
@@ -258,3 +257,4 @@ mux4 memwb_mux
  * 2. Incorporate data hazard handling logic
  * 3. Stall on mem_resp
  */
+endmodule

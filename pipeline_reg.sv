@@ -122,7 +122,7 @@ begin
     controlw_out = controlw;
 end
 
-endmodule : if_id_reg
+endmodule : id_ex_reg
 
 
 
@@ -144,7 +144,7 @@ module ex_mem_reg
                       u_imm_out
 );
 
-logic [31:0] aluout, rs2out, bren;
+logic [31:0] aluout, rs2out, bren, u_imm;
 rv32i_control_word controlw;
 
 initial
@@ -199,7 +199,7 @@ module mem_wb_reg
 );
 
 rv32i_control_word controlw;
-logic [31:0] aluout, bren, dmemout;
+logic [31:0] aluout, bren, dmemout, u_imm;
 
 initial
 begin

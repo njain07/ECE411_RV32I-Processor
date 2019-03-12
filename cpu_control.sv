@@ -25,7 +25,7 @@ begin
 	cword.memwbmux_sel = 0;
 	cword.mem_wmask = 0;
 	cword.alumux2_sel = 0;
-	cmpop = branch_funct3_t'(funct3);
+	cword.cmpop = branch_funct3_t'(funct3);
 
 	/* Assign control signals */
 	case(opcode)
@@ -126,5 +126,6 @@ begin
 //		end
 
 	endcase
+end
 
 endmodule : cpu_control

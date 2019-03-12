@@ -70,7 +70,7 @@ typedef struct packed {
     logic [3:0] memwbmux_sel; //same as regfilemux
     logic [3:0] mem_wmask;
     logic [2:0] alumux2_sel;
-} rv32i_control_word
+} rv32i_control_word;
 
 typedef logic [31:0] rv32i_word;
 typedef logic [4:0] rv32i_reg;
