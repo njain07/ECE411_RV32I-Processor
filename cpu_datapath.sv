@@ -2,28 +2,22 @@ import rv32i_types::*;
 
 module cpu_datapath
 (
-	input logic 		clk,
-						memwb_pcmuxsel,
-						resp_a,
-						resp_b,
+	input logic 				clk,
+											resp_a,
+											resp_b,
 
 	input logic	[31:0]	rdata_a,
-						rdata_b,
+											rdata_b,
 
-	output logic		read_b,
-						write,
-						read_a,
+	output logic				read_b,
+											write,
+											read_a,
 
 	output logic [3:0] 	wmask,
-	output logic [2:0] 	funct3,
-	output logic [7:0] 	funct7,
 
 	output logic [31:0]	address_a,
-						address_b,
-						wdata,
-						memwbmux_out,
-
-	output rv32i_control_word controlw
+											address_b,
+											wdata,
 );
 
 //Internal signals
@@ -49,10 +43,13 @@ logic br_en;
 logic [31:0] cmpmux_out, alumux1_out, alumux2_out, alu_out;
 //EX_MEM
 logic [31:0] exmem_aluout, exmem_rs2out, exmem_bren, exmem_u_imm;
-//Mem
+//Mem_WB
 logic [31:0] memwb_aluout, memwb_bren, memwb_rdata, memwb_u_imm;
+//WB
+logic [31:0] memwbmux_out;
 
-rv32i_control_word memwb_controlw, idex_controlw, exmem_controlw;
+//Control
+rv32i_control_word controlw, idex_controlw, exmem_controlw, memwb_controlw;
 
 /*
  * Instruction fetch
@@ -79,7 +76,7 @@ mux2 pcmux
 pc_register pc
 (
     .clk,
-    .load(load_pc),
+    .load(1), //needs to be changed
     .in(pcmux_out),
     .out(pc_out)
 );

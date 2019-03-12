@@ -127,5 +127,4 @@ begin
 
 	endcase
 
-end
 endmodule : cpu_control
