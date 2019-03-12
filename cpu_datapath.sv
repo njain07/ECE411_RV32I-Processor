@@ -62,6 +62,12 @@ assign pc_plus4 = pc_out + 4;
 assign mem_wdata = rs2_out;
 assign read_a = 1; //to be changed
 
+cpu_control ctrl
+(
+	.*,
+	.cword(controlw)
+);
+
 mux2 pcmux
 (
     .sel(memwb_pcmuxsel),
@@ -249,13 +255,9 @@ mux4 memwb_mux
 	.f(memwbmux_out)
 );
 
-/* 
+/*
  * TODO:
- * 1. Verify that there are no race conditions in pipeline registers while r/w 
+ * 1. Verify that there are no race conditions in pipeline registers while r/w
  * 2. Incorporate data hazard handling logic
  * 3. Stall on mem_resp
- */ 
-
-
-
-
+ */

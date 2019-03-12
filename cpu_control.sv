@@ -2,145 +2,130 @@ import rv32i_types::*;
 
 module cpu_control
 (
+	input rv32i_opcode opcode,
+	input logic [2:0] funct3,
+	input logic [6:0] funct7,
 
+	output rv32i_control_word cword
 );
+arith_funct3_t arith_funct3;
 
-enum int unsigned {
-	/* List of states */
-	s_fetch1,
-	s_fetch2,
-	s_fetch3,
-	s_decode,
-	s_aupic,
-	s_imm,
-	s_br,
-	s_calc_addr,
-	s_ldr1,
-	s_ldr2,
-	s_str1,
-	s_str2,
-	s_lui,
-	s_reg,
-	s_jal,
-	s_jalr
-	// do we need more states??
-} state, next_state;
+assign arith_funct3 = arith_funct3_t'(funct3);
 
 always_comb
-begin: state_actions
-	/* Default output assignments */
+begin
+	/* Default assignments */
+	cword.opcode = opcode;
+	cword.aluop = alu_add;
+	cword.load_regfile = 0;
+	cword.cmpmux_sel = 0;
+	cword.alumux1_sel = 0;
+	cword.mem_read = 0;
+	cword.mem_write = 0;
+	cword.memwbmux_sel = 0;
+	cword.mem_wmask = 0;
+	cword.alumux2_sel = 0;
+	cmpop = branch_funct3_t'(funct3);
 
-	/* Actions for each state */
-	case(state)
-		s_fetch1 : begin
+	/* Assign control signals */
+	case(opcode)
+		op_lui : begin
+			cword.load_regfile = 1;
+			cword.memwbmux_sel = 2;
 		end
 
-		s_fetch2 : begin
+		op_auipc : begin
+			cword.load_regfile = 1;
+			cword.alumux1_sel = 1;
+			cword.alumux2_sel = 1;
+			cword.aluop = alu_add;
 		end
 
-		s_fetch3 : begin
+//		op_jal : begin
+//  	end
+
+//		op_jalr : begin
+//		end
+
+		op_br : begin
+			cword.alumux1_sel = 1;
+			cword.alumux2_sel = 2;
+			cword.aluop = alu_add;
 		end
 
-		s_decode : ;
-
-		s_aupic : begin
+		op_load : begin
+			cword.aluop = alu_add;
+			cword.mem_read = 1;
+			cword.memwbmux_sel = 3;
+			cword.load_regfile = 1;
 		end
 
-		s_imm : begin
+		op_store : begin
+			cword.alumux2_sel = 3;
+			cword.aluop = alu_add;
+			cword.mem_write = 1;
 		end
 
-		s_br : begin
+		op_imm : begin
+			cword.load_regfile = 1;
+			cword.aluop = alu_ops'(funct3);
+			case(arith_funct3)
+				slt : begin
+					cword.cmpop = blt;
+					cword.memwbmux_sel = 1;
+					cword.cmpmux_sel = 1;
+				end
+
+				sltu : begin
+					cword.cmpop = bltu;
+					cword.memwbmux_sel = 1;
+					cword.cmpmux_sel = 1;
+				end
+
+				sr : begin
+					if(funct7[5])
+						cword.aluop = alu_sra;
+					else
+						cword.aluop = alu_srl;
+				end
+
+			endcase
 		end
 
-		s_calc_addr : begin
+		op_reg : begin
+			cword.load_regfile = 1;
+			cword.alumux2_sel = 4;
+			cword.aluop = alu_ops'(funct3);
+			case(arith_funct3)
+				add : begin
+					if(funct7[5])
+						cword.aluop = alu_sub;
+				end
+
+				slt : begin
+					cword.cmpop = blt;
+					cword.memwbmux_sel = 1;
+				end
+
+				sltu : begin
+					cword.cmpop = bltu;
+					cword.memwbmux_sel = 1;
+				end
+
+				sr : begin
+					if(funct7[5])
+						cword.aluop = alu_sra;
+					else
+						cword.aluop = alu_srl;
+				end
+
+			endcase
 		end
 
-		s_ldr1 : begin
-		end
+//		op_csr : begin
+//		end
 
-		s_ldr2 : begin
-		end
+	endcase
 
-		s_str1 : begin
-		end
-
-		s_str2 : begin
-		end
-
-		s_lui : begin
-		end
-
-		s_reg : begin
-		end
-
-		s_jal : begin
-		end
-
-		s_jalr : begin
-		end
-
-		default : ;
-	endcase 
 end
-
-always_comb
-begin : next_state_logic
-	next_state = state;
-	case(state)
-		s_fetch1 : begin
-		end
-
-		s_fetch2 : begin
-		end
-
-		s_fetch3 : begin
-		end
-
-		s_decode : ;
-
-		s_aupic : begin
-		end
-
-		s_imm : begin
-		end
-
-		s_br : begin
-		end
-
-		s_calc_addr : begin
-		end
-
-		s_ldr1 : begin
-		end
-
-		s_ldr2 : begin
-		end
-
-		s_str1 : begin
-		end
-
-		s_str2 : begin
-		end
-
-		s_lui : begin
-		end
-
-		s_reg : begin
-		end
-
-		s_jal : begin
-		end
-
-		s_jalr : begin
-		end
-
-		default : ;
-	endcase 
-end
-
-always_ff @(posedge clk)
-begin: next_state_assignment
-	state <= next_state;
-end
-
 endmodule : cpu_control
