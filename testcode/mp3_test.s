@@ -4,7 +4,22 @@ riscv_mp0.s:
 .globl _start
 
 _start:
-	xor	 x1, x1, 0		#clear
+	# auipc x1, number
+	# nop
+	# nop
+	# nop
+	# nop
+	addi x1, x1, 15
+	nop
+	nop
+	nop
+	nop
+	# lw x1, 0(x1)
+	# nop
+	# nop
+	# nop
+	# nop
+	sw x1, 188(x0)
 	nop
 	nop
 	nop

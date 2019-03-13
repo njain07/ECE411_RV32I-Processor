@@ -22,7 +22,7 @@ module cpu_datapath
 
 //Internal signals
 //IF
-logic [31:0] pc_plus4, pcmux_out, pc_out;
+logic [31:0] pc_plus4, pcmux_out, pc_out, pc_sync_out;
 //IF_ID
 logic [31:0] ifid_instr, ifid_pc;
 //ID
@@ -42,6 +42,7 @@ logic br_en;
 logic [31:0] cmpmux_out, alumux1_out, alumux2_out, alu_out;
 //EX_MEM
 logic [31:0] exmem_aluout, exmem_rs2out, exmem_bren, exmem_u_imm;
+logic load;
 //Mem_WB
 logic [31:0] memwb_aluout, memwb_bren, memwb_rdata, memwb_u_imm;
 //WB
@@ -54,6 +55,7 @@ rv32i_control_word controlw, idex_controlw, exmem_controlw, memwb_controlw;
 /*
  * Instruction fetch
  */
+
 
 assign pc_plus4 = pc_out + 4;
 assign read_a = 1; //to be changed
@@ -76,17 +78,25 @@ mux2 pcmux
 pc_register pc
 (
     .clk,
-    .load(1'b1), //needs to be changed
+    .load, //needs to be changed
     .in(pcmux_out),
     .out(pc_out)
+);
+
+register pc_sync
+(
+	.clk,
+	.load,
+	.in(pc_out),
+	.out(pc_sync_out)
 );
 
 if_id_reg if_id
 (
 	.clk,
-	.load(1'b1), //to be changed for data hazards
+	.load, //to be changed for data hazards
 	.instr_in(rdata_a),
-	.pc_in(pc_out),
+	.pc_in(pc_sync_out),
 	.instr_out(ifid_instr),
 	.pc_out(ifid_pc)
 );
@@ -99,7 +109,7 @@ ir IR
 (
    .*,
    .clk,
-   .load(1'b1), //to be changed
+   .load, //to be changed
    .in(ifid_instr)
 );
 
@@ -119,7 +129,7 @@ regfile regfile
 id_ex_reg id_ex
 (
 	.clk,
-	.load(1'b1), //to be changed
+	.load, //to be changed
 	.controlw_in(controlw),
 	.controlw_out(idex_controlw),
 	.pc_in(ifid_pc),
@@ -199,7 +209,7 @@ mux8 alumux2
 ex_mem_reg ex_mem
 (
 	.clk,
-	.load(1'b1), //to be changed
+	.load, //to be changed
 	.controlw_in (idex_controlw),
 	.controlw_out(exmem_controlw),
 	.aluout_in(alu_out),
@@ -222,10 +232,12 @@ assign wmask = exmem_controlw.mem_wmask;
 assign address_b = exmem_aluout;
 assign wdata = exmem_rs2out;
 
+mem_stall stall (.*);
+
 mem_wb_reg mem_wb
 (
 	.clk,
-	.load(1'b1), //to be changed
+	.load, //to be changed
 	.controlw_in (exmem_controlw),
 	.controlw_out(memwb_controlw),
 	.aluout_in(exmem_aluout),

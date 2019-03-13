@@ -25,7 +25,7 @@ begin
 	cword.mem_read = 0;
 	cword.mem_write = 0;
 	cword.memwbmux_sel = 0;
-	cword.mem_wmask = 0;
+	cword.mem_wmask = 4'b1111;
 	cword.alumux2_sel = 0;
 	cword.cmpop = branch_funct3_t'(funct3);
 
