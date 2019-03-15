@@ -24,7 +24,7 @@ module cpu_datapath
 //IF
 logic [31:0] pc_plus4, pcmux_out, pc_out, pc_sync_out;
 //IF_ID
-logic [31:0] ifid_instr, ifid_pc;
+logic [31:0] ifid_instr, ifid_pc, ifid_pc_sync;
 //ID
 rv32i_opcode opcode;
 logic [2:0] funct3;
@@ -45,6 +45,7 @@ logic [31:0] exmem_aluout, exmem_rs2out, exmem_bren, exmem_u_imm;
 logic load;
 //Mem_WB
 logic [31:0] memwb_aluout, memwb_bren, memwb_rdata, memwb_u_imm;
+logic [31:0] bren_sync, aluout_sync, controlw_sync, u_imm_sync;
 //WB
 logic [31:0] memwbmux_out;
 logic 		 memwb_pcmuxsel;
@@ -89,7 +90,7 @@ register pc_sync
 	.load,
 	.in(pc_out),
 	.out(pc_sync_out)
-);
+); //hacky, talk to TA
 
 if_id_reg if_id
 (
@@ -125,6 +126,13 @@ regfile regfile
     .reg_b(rs2_out)
 );
 
+register id_pc_sync
+(
+	.clk,
+	.load,
+	.in(ifid_pc),
+	.out(ifid_pc_sync)
+); //hacky, talk to TA
 
 id_ex_reg id_ex
 (
@@ -132,7 +140,7 @@ id_ex_reg id_ex
 	.load, //to be changed
 	.controlw_in(controlw),
 	.controlw_out(idex_controlw),
-	.pc_in(ifid_pc),
+	.pc_in(ifid_pc_sync),
 	.i_imm_in(i_imm),
 	.s_imm_in(s_imm),
 	.b_imm_in(b_imm),
@@ -234,16 +242,33 @@ assign wdata = exmem_rs2out;
 
 mem_stall stall (.*);
 
-mem_wb_reg mem_wb
+mem_wb_reg mem_sync
 (
 	.clk,
 	.load, //to be changed
 	.controlw_in (exmem_controlw),
-	.controlw_out(memwb_controlw),
+	.controlw_out(controlw_sync),
 	.aluout_in(exmem_aluout),
 	.bren_in(exmem_bren),
-	.dmemout_in(rdata_b),
+	.dmemout_in(),
 	.u_imm_in(exmem_u_imm),
+	.aluout_out(aluout_sync),
+	.bren_out(bren_sync),
+	.dmemout_out(),
+	.u_imm_out(u_imm_sync),
+	.pcmuxsel()
+); //hacky, talk to TA
+
+mem_wb_reg mem_wb
+(
+	.clk,
+	.load, //to be changed
+	.controlw_in (controlw_sync),
+	.controlw_out(memwb_controlw),
+	.aluout_in(aluout_sync),
+	.bren_in(bren_sync),
+	.dmemout_in(rdata_b),
+	.u_imm_in(u_imm_sync),
 	.aluout_out(memwb_aluout),
 	.bren_out(memwb_bren),
 	.dmemout_out(memwb_rdata),

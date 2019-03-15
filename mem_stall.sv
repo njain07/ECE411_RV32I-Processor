@@ -1,6 +1,7 @@
 module mem_stall
 (
-  input logic   read_b,
+  input logic   clk,
+                read_b,
                 write,
                 resp_b,
   output logic  load
@@ -9,8 +10,8 @@ module mem_stall
 always_comb
 begin
   load = 1;
-  if (read_b || write)
-    load = resp_b;
+  // if (read_b || write)
+  //   load <= resp_b;
 end
 
 endmodule
