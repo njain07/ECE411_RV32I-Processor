@@ -2,22 +2,22 @@ import rv32i_types::*;
 
 module cpu_datapath
 (
-	input logic 				clk,
-											resp_a,
-											resp_b,
+	input logic 		clk,
+						resp_a,
+						resp_b,
 
 	input logic	[31:0]	rdata_a,
-											rdata_b,
+						rdata_b,
 
-	output logic				read_b,
-											write,
-											read_a,
+	output logic		read_b,
+						write,
+						read_a,
 
 	output logic [3:0] 	wmask,
 
 	output logic [31:0]	address_a,
-											address_b,
-											wdata
+						address_b,
+						wdata
 );
 
 //Internal signals
@@ -84,20 +84,20 @@ pc_register pc
     .out(pc_out)
 );
 
-register pc_sync
-(
-	.clk,
-	.load,
-	.in(pc_out),
-	.out(pc_sync_out)
-); //hacky, talk to TA
+// register pc_sync
+// (
+// 	.clk,
+// 	.load,
+// 	.in(pc_out),
+// 	.out(pc_sync_out)
+// ); //hacky, talk to TA
 
 if_id_reg if_id
 (
 	.clk,
 	.load, //to be changed for data hazards
 	.instr_in(rdata_a),
-	.pc_in(pc_sync_out),
+	.pc_in(pc_out),
 	.instr_out(ifid_instr),
 	.pc_out(ifid_pc)
 );
@@ -242,33 +242,33 @@ assign wdata = exmem_rs2out;
 
 mem_stall stall (.*);
 
-mem_wb_reg mem_sync
-(
-	.clk,
-	.load, //to be changed
-	.controlw_in (exmem_controlw),
-	.controlw_out(controlw_sync),
-	.aluout_in(exmem_aluout),
-	.bren_in(exmem_bren),
-	.dmemout_in(),
-	.u_imm_in(exmem_u_imm),
-	.aluout_out(aluout_sync),
-	.bren_out(bren_sync),
-	.dmemout_out(),
-	.u_imm_out(u_imm_sync),
-	.pcmuxsel()
-); //hacky, talk to TA
+// mem_wb_reg mem_sync
+// (
+// 	.clk,
+// 	.load, //to be changed
+// 	.controlw_in (exmem_controlw),
+// 	.controlw_out(controlw_sync),
+// 	.aluout_in(exmem_aluout),
+// 	.bren_in(exmem_bren),
+// 	.dmemout_in(),
+// 	.u_imm_in(exmem_u_imm),
+// 	.aluout_out(aluout_sync),
+// 	.bren_out(bren_sync),
+// 	.dmemout_out(),
+// 	.u_imm_out(u_imm_sync),
+// 	.pcmuxsel()
+// ); //hacky, talk to TA
 
 mem_wb_reg mem_wb
 (
 	.clk,
 	.load, //to be changed
-	.controlw_in (controlw_sync),
+	.controlw_in (exmem_controlw),
 	.controlw_out(memwb_controlw),
-	.aluout_in(aluout_sync),
-	.bren_in(bren_sync),
+	.aluout_in(exmem_aluout),
+	.bren_in(exmem_bren),
 	.dmemout_in(rdata_b),
-	.u_imm_in(u_imm_sync),
+	.u_imm_in(exmem_u_imm),
 	.aluout_out(memwb_aluout),
 	.bren_out(memwb_bren),
 	.dmemout_out(memwb_rdata),

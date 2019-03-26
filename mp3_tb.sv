@@ -4,19 +4,25 @@ timeunit 1ns;
 timeprecision 1ns;
 
 logic clk;
-logic resp_a, resp_b;
-logic read_a, read_b;
-logic write;
-logic [3:0] wmask;
+// logic resp_a, resp_b;
+// logic read_a, read_b;
+// logic write;
+// logic [3:0] wmask;
 // logic [15:0] errcode;
-logic [31:0] address_a, address_b;
-logic [31:0] rdata_a, rdata_b;
-logic [31:0] wdata;
+// logic [31:0] address_a, address_b;
+// logic [31:0] rdata_a, rdata_b;
+// logic [31:0] wdata;
 // logic [31:0] write_data;
 // logic [31:0] write_address;
 // logic write;
 logic [31:0] registers [32];
 logic halt;
+logic pmem_resp;
+logic pmem_read;
+logic pmem_write;
+logic [31:0] pmem_address;
+logic [255:0] pmem_wdata;
+logic [255:0] pmem_rdata;
 // logic [63:0] order;
 
 initial
@@ -49,34 +55,34 @@ end
 
 mp3 dut
 (
-    .clk,
-    .resp_a,
-    .resp_b,
-    .rdata_a,
-    .rdata_b,
-    .read_a,
-    .read_b,
-    .write,
-    .wmask,
-    .address_a,
-    .address_b,
-    .wdata
+    .*
 );
 
-magic_memory_dp memory
-(
+// magic_memory_dp memory
+// (
+//     .clk,
+//     .resp_a,
+//     .resp_b,
+//     .rdata_a,
+//     .rdata_b,
+//     .read_a,
+//     .read_b,
+//     .write,
+//     .wmask,
+//     .address_a,
+//     .address_b,
+//     .wdata
+// );
+
+physical_memory memory(
     .clk,
-    .resp_a,
-    .resp_b,
-    .rdata_a,
-    .rdata_b,
-    .read_a,
-    .read_b,
-    .write,
-    .wmask,
-    .address_a,
-    .address_b,
-    .wdata
+    .read(pmem_read),
+    .write(pmem_write),
+    .address(pmem_address),
+    .wdata(pmem_wdata),
+    .resp(pmem_resp),
+    .error(pm_error),
+    .rdata(pmem_rdata)
 );
 
 // riscv_formal_monitor_rv32i monitor
