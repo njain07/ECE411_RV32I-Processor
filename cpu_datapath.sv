@@ -22,7 +22,8 @@ module cpu_datapath
 
 //Internal signals
 //IF
-logic [31:0] pc_plus4, pcmux_out, pc_out, pc_sync_out;
+logic [31:0] pc_plus4, pcmux_out, pc_out, pc_sync_out, instr_out, nop;
+logic pc_load;
 //IF_ID
 logic [31:0] ifid_instr, ifid_pc, ifid_pc_4, ifid_pc_sync;
 //ID
@@ -59,7 +60,7 @@ rv32i_control_word controlw, idex_controlw, exmem_controlw, memwb_controlw;
  * Instruction fetch
  */
 
-
+assign nop = 32'h00000013;
 assign pc_plus4 = pc_out + 4;
 assign read_a = 1; //to be changed
 assign address_a = pc_out;
@@ -81,9 +82,17 @@ mux2 pcmux
 pc_register pc
 (
     .clk,
-    .load, //needs to be changed
+    .load(pc_load), //needs to be changed
     .in(pcmux_out),
     .out(pc_out)
+);
+
+mux2 nop_mux
+(
+	.sel(~pc_load),
+	.a(rdata_a),
+	.b(nop),
+	.f(instr_out)
 );
 
 // register pc_sync
@@ -98,7 +107,7 @@ if_id_reg if_id
 (
 	.clk,
 	.load, //to be changed for data hazards
-	.instr_in(rdata_a),
+	.instr_in(instr_out),
 	.pc_in(pc_out),
 	.pc_4_in(pc_plus4),
 	.instr_out(ifid_instr),
@@ -244,7 +253,6 @@ ex_mem_reg ex_mem
 
 assign read_b = exmem_controlw.mem_read;
 assign write = exmem_controlw.mem_write;
-assign wmask = exmem_controlw.mem_wmask;
 assign address_b = exmem_aluout;
 // assign wdata = exmem_rs2out;
 
