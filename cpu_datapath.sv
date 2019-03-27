@@ -43,6 +43,8 @@ logic [31:0] cmpmux_out, alumux1_out, alumux2_out, alu_out;
 //EX_MEM
 logic [31:0] exmem_aluout, exmem_rs2out, exmem_bren, exmem_u_imm;
 logic load;
+logic [31:0] final_rdata_b;
+logic [31:0] final_wdata;
 //Mem_WB
 logic [31:0] memwb_aluout, memwb_bren, memwb_rdata, memwb_u_imm;
 logic [31:0] bren_sync, aluout_sync, controlw_sync, u_imm_sync;
@@ -164,6 +166,14 @@ id_ex_reg id_ex
 );
 
 
+shifter shift_data
+(
+	.sel(mem_byte_enable),
+	.in(rs2_out),
+	.out(out_data)
+);
+
+
 /*
  * Execute
  */
@@ -234,11 +244,28 @@ ex_mem_reg ex_mem
  * Memory
  */
 
+
+
 assign read_b = exmem_controlw.mem_read;
 assign write = exmem_controlw.mem_write;
 assign wmask = exmem_controlw.mem_wmask;
 assign address_b = exmem_aluout;
-assign wdata = exmem_rs2out;
+// assign wdata = exmem_rs2out;
+
+loader load_reg 
+(
+	.load_sel(exmem_controlw.funct3),
+	.in(rdata_b),
+	.address(address_b),
+	.out(final_rdata_b)
+);
+
+shifter shift_data
+(
+	.sel(wmask),
+	.in(exmem_rs2out),
+	.out(wdata)
+);
 
 mem_stall stall (.*);
 
@@ -267,7 +294,7 @@ mem_wb_reg mem_wb
 	.controlw_out(memwb_controlw),
 	.aluout_in(exmem_aluout),
 	.bren_in(exmem_bren),
-	.dmemout_in(rdata_b),
+	.dmemout_in(final_rdata_b),
 	.u_imm_in(exmem_u_imm),
 	.aluout_out(memwb_aluout),
 	.bren_out(memwb_bren),
