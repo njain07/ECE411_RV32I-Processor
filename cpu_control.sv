@@ -25,9 +25,9 @@ begin
 	cword.mem_read = 0;
 	cword.mem_write = 0;
 	cword.memwbmux_sel = 0;
-	cword.mem_wmask = 4'b1111;
 	cword.alumux2_sel = 0;
 	cword.cmpop = branch_funct3_t'(funct3);
+	cword.funct3 = funct3;
 
 	/* Assign control signals */
 	case(opcode)
@@ -43,11 +43,21 @@ begin
 			cword.aluop = alu_add;
 		end
 
-//		op_jal : begin
-//  	end
+		op_jal : begin
+			cword.load_regfile = 1;
+			cword.memwbmux_sel = 4;
+			cword.alumux1_sel = 1;
+			cword.alumux2_sel = 5;
+			cword.aluop = alu_add;
+		end
 
-//		op_jalr : begin
-//		end
+
+		op_jalr : begin
+			cword.load_regfile = 1;
+			cword.memwbmux_sel = 4;
+			cword.aluop = alu_add;
+		end
+
 
 		op_br : begin
 			cword.alumux1_sel = 1;
@@ -123,9 +133,6 @@ begin
 
 			endcase
 		end
-
-//		op_csr : begin
-//		end
 
 	endcase
 end

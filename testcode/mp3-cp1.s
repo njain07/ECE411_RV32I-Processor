@@ -3,9 +3,10 @@
 .section .text
 .globl _start
 _start:
-    lw x1, %lo(NEGTWO)(x0)
-    lw x2, %lo(TWO)(x0)
+    lbu x1, %lo(NEGTWO)(x0)
+    lh x2, %lo(TWO)(x0)
     lw x4, %lo(ONE)(x0)
+    lw x11, %lo(LOOP)(x0)
     nop
     nop
     nop
@@ -13,7 +14,7 @@ _start:
     nop
     nop
     nop
-    beq x0, x0, LOOP
+    jr x11
     nop
     nop
     nop
@@ -25,13 +26,13 @@ _start:
 .section .rodata
 .balign 256
 ONE:    .word 0x00000001
-TWO:    .word 0x00000002
+TWO:    .word 0x01200002
 NEGTWO: .word 0xFFFFFFFE
 TEMP1:  .word 0x00000001
 GOOD:   .word 0x600D600D
 BADD:   .word 0xBADDBADD
 
-	
+
 .section .text
 .align 4
 LOOP:
@@ -73,7 +74,7 @@ LOOP:
     nop
 
     lw x1, %lo(BADD)(x0)
-HALT:	
+HALT:
     beq x0, x0, HALT
     nop
     nop
@@ -82,10 +83,10 @@ HALT:
     nop
     nop
     nop
-		
+
 DONEa:
     lw x1, %lo(GOOD)(x0)
-DONEb:	
+DONEb:
     beq x0, x0, DONEb
     nop
     nop
@@ -94,4 +95,3 @@ DONEb:
     nop
     nop
     nop
-	

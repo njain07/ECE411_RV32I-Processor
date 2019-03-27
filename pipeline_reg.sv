@@ -6,15 +6,19 @@ module if_id_reg
                         load,
   input logic [31:0]    instr_in,
                         pc_in,
+                        pc_4_in,
   output logic [31:0]   instr_out,
-                        pc_out
+                        pc_out,
+                        pc_4_out
 );
 
-logic [31:0] instr, pc;
+logic [31:0] instr, pc, pc_plus_4;
 
 initial
 begin
     instr = 1'b0;
+    pc = 32'b0;
+    pc_plus_4 = 32'b0;
 end
 
 always_ff @(posedge clk)
@@ -23,6 +27,7 @@ begin
     begin
         instr <= instr_in;
         pc <= pc_in;
+        pc_plus_4 <= pc_4_in;
     end
 end
 
@@ -30,6 +35,7 @@ always_comb
 begin
     instr_out = instr;
     pc_out = pc;
+    pc_4_out = pc_plus_4;
 end
 
 endmodule : if_id_reg
@@ -44,6 +50,7 @@ module id_ex_reg
   output rv32i_control_word controlw_out,
 
   input logic [31:0]    pc_in,
+                        pc_4_in,
                         i_imm_in,
                         s_imm_in,
                         b_imm_in,
@@ -57,6 +64,7 @@ module id_ex_reg
 
 
   output logic [31:0]   pc_out,
+                        pc_4_out,
                         i_imm_out,
                         s_imm_out,
                         b_imm_out,
@@ -72,12 +80,13 @@ module id_ex_reg
 rv32i_control_word controlw;
 logic [2:0] funct3;
 logic [6:0] funct7;
-logic [31:0] pc, i_imm;
+logic [31:0] pc, pc_plus_4, i_imm;
 logic [31:0] s_imm, b_imm, u_imm, j_imm, rs1out, rs2out;
 
 initial
 begin
     pc = 32'b0;
+    pc_plus_4 = 32'b0;
     i_imm = 32'b0;
     s_imm = 32'b0;
     b_imm = 32'b0;
@@ -94,6 +103,7 @@ begin
     if (load)
     begin
       pc <= pc_in;
+      pc_plus_4 <= pc_4_in;
       i_imm <= i_imm_in;
       s_imm <= s_imm_in;
       b_imm <= b_imm_in;
@@ -110,6 +120,7 @@ end
 always_comb
 begin
     pc_out = pc;
+    pc_4_out = pc_plus_4;
     i_imm_out = i_imm;
     s_imm_out = s_imm;
     b_imm_out = b_imm;
@@ -138,13 +149,15 @@ module ex_mem_reg
                       rs2out_in,
                       bren_in,
                       u_imm_in,
+                      pc_4_in,
   output logic [31:0] aluout_out,
                       rs2out_out,
                       bren_out,
-                      u_imm_out
+                      u_imm_out,
+                      pc_4_out
 );
 
-logic [31:0] aluout, rs2out, bren, u_imm;
+logic [31:0] aluout, rs2out, bren, u_imm, pc_plus_4;
 rv32i_control_word controlw;
 
 initial
@@ -153,6 +166,7 @@ begin
     rs2out = 32'b0;
     bren = 32'b0;
     u_imm = 32'b0;
+    pc_plus_4 = 32'b0;
 end
 
 always_ff @(posedge clk)
@@ -164,6 +178,7 @@ begin
       bren <= bren_in;
       controlw <= controlw_in;
       u_imm <= u_imm_in;
+      pc_plus_4 <= pc_4_in;
     end
 end
 
@@ -174,6 +189,7 @@ begin
   bren_out = bren;
   controlw_out = controlw;
   u_imm_out = u_imm;
+  pc_4_out = pc_plus_4;
 end
 
 endmodule : ex_mem_reg
@@ -191,15 +207,17 @@ module mem_wb_reg
                       bren_in,
                       dmemout_in,
                       u_imm_in,
+                      pc_4_in,
   output logic [31:0] aluout_out,
                       bren_out,
                       dmemout_out,
                       u_imm_out,
-  output logic [1:0]  pcmuxsel
+                      pc_4_out,
+  output logic        pcmuxsel
 );
 
 rv32i_control_word controlw;
-logic [31:0] aluout, bren, dmemout, u_imm;
+logic [31:0] aluout, bren, dmemout, u_imm, pc_plus_4;
 
 initial
 begin
@@ -207,9 +225,10 @@ begin
     bren = 32'b0;
     dmemout = 32'b0;
     u_imm = 32'b0;
+    pc_plus_4 = 32'b0;
 end
 
-//assign pcmuxsel = (controlw.opcode == op_jal) || (controlw.opcode == op_jalr) || (controlw.opcode == op_br && (bren[0]));
+assign pcmuxsel = (controlw.opcode == op_jal) || (controlw.opcode == op_jalr) || (controlw.opcode == op_br && (bren[0]));
 
 always_ff @(posedge clk)
 begin
@@ -220,6 +239,7 @@ begin
         dmemout <= dmemout_in;
         controlw <= controlw_in;
         u_imm <= u_imm_in;
+        pc_plus_4 <= pc_4_in;
     end
 end
 
@@ -230,6 +250,7 @@ begin
     dmemout_out = dmemout;
     controlw_out = controlw;
     u_imm_out = u_imm;
+    pc_4_out = pc_plus_4;
 
     // case(controlw.opcode)
     //   op_br : begin
@@ -244,8 +265,8 @@ begin
     //   op_jalr : pcmuxsel = 3;
 
     //   default: pcmuxsel = 0;
-      
-    // endcase 
+
+    // endcase
 end
 
 endmodule : mem_wb_reg

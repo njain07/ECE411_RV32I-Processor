@@ -63,6 +63,8 @@ set_global_assignment -name EDA_TEST_BENCH_RUN_SIM_FOR "200 ns" -section_id mp3_
 set_global_assignment -name EDA_NATIVELINK_SIMULATION_SETUP_SCRIPT simulation/modelsim/wave.do -section_id eda_simulation
 set_global_assignment -name EDA_TEST_BENCH_FILE mp3_tb.sv -section_id mp3_tb
 set_global_assignment -name EDA_TEST_BENCH_FILE physical_memory.sv -section_id mp3_tb
+set_global_assignment -name SYSTEMVERILOG_FILE shifter.sv
+set_global_assignment -name SYSTEMVERILOG_FILE loader.sv
 set_global_assignment -name SYSTEMVERILOG_FILE data_array.sv
 set_global_assignment -name SYSTEMVERILOG_FILE arbiter.sv
 set_global_assignment -name SYSTEMVERILOG_FILE decoder.sv

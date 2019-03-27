@@ -24,7 +24,7 @@ cache_datapath instr_datapath
     .mem_read(read_a),
     .mem_byte_enable(4'd0),
     .mem_address(address_a),
-    .mem_wdata(4'd0),
+    .mem_wdata(32'd0),
     .mem_rdata(rdata_a),
     .pmem_rdata(pmem_rdata_a),
     .pmem_wdata(),

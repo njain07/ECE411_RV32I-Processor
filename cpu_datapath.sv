@@ -24,7 +24,7 @@ module cpu_datapath
 //IF
 logic [31:0] pc_plus4, pcmux_out, pc_out, pc_sync_out;
 //IF_ID
-logic [31:0] ifid_instr, ifid_pc, ifid_pc_sync;
+logic [31:0] ifid_instr, ifid_pc, ifid_pc_4, ifid_pc_sync;
 //ID
 rv32i_opcode opcode;
 logic [2:0] funct3;
@@ -36,17 +36,17 @@ logic [31:0] rs1_out, rs2_out;
 logic [2:0] idex_funct3;
 logic [6:0] idex_funct7;
 logic [31:0] idex_i_imm, idex_s_imm, idex_b_imm, idex_u_imm, idex_j_imm;
-logic [31:0] idex_rs1out, idex_rs2out, idex_pc;
+logic [31:0] idex_rs1out, idex_rs2out, idex_pc, idex_pc_4;
 //EX
 logic br_en;
 logic [31:0] cmpmux_out, alumux1_out, alumux2_out, alu_out;
 //EX_MEM
-logic [31:0] exmem_aluout, exmem_rs2out, exmem_bren, exmem_u_imm;
+logic [31:0] exmem_aluout, exmem_rs2out, exmem_bren, exmem_u_imm, exmem_pc_4;
 logic load;
 logic [31:0] final_rdata_b;
 logic [31:0] final_wdata;
 //Mem_WB
-logic [31:0] memwb_aluout, memwb_bren, memwb_rdata, memwb_u_imm;
+logic [31:0] memwb_aluout, memwb_bren, memwb_rdata, memwb_u_imm, memwb_pc_4;
 logic [31:0] bren_sync, aluout_sync, controlw_sync, u_imm_sync;
 //WB
 logic [31:0] memwbmux_out;
@@ -100,8 +100,10 @@ if_id_reg if_id
 	.load, //to be changed for data hazards
 	.instr_in(rdata_a),
 	.pc_in(pc_out),
+	.pc_4_in(pc_plus4),
 	.instr_out(ifid_instr),
-	.pc_out(ifid_pc)
+	.pc_out(ifid_pc),
+	.pc_4_out(ifid_pc_4)
 );
 
 /*
@@ -143,6 +145,7 @@ id_ex_reg id_ex
 	.controlw_in(controlw),
 	.controlw_out(idex_controlw),
 	.pc_in(ifid_pc_sync),
+	.pc_4_in(ifid_pc_4),
 	.i_imm_in(i_imm),
 	.s_imm_in(s_imm),
 	.b_imm_in(b_imm),
@@ -152,8 +155,8 @@ id_ex_reg id_ex
 	.rs2out_in(rs2_out),
 	.funct3_in(funct3),
 	.funct7_in(funct7),
-
 	.pc_out (idex_pc),
+	.pc_4_out(idex_pc_4),
 	.i_imm_out(idex_i_imm),
 	.s_imm_out(idex_s_imm),
 	.b_imm_out(idex_b_imm),
@@ -164,15 +167,6 @@ id_ex_reg id_ex
 	.funct3_out(idex_funct3),
 	.funct7_out(idex_funct7)
 );
-
-
-shifter shift_data
-(
-	.sel(mem_byte_enable),
-	.in(rs2_out),
-	.out(out_data)
-);
-
 
 /*
  * Execute
@@ -234,10 +228,12 @@ ex_mem_reg ex_mem
 	.rs2out_in(idex_rs2out),
 	.bren_in({ 31'd0, br_en }),
 	.u_imm_in(idex_u_imm),
+	.pc_4_in(idex_pc_4),
 	.aluout_out(exmem_aluout),
 	.rs2out_out(exmem_rs2out),
 	.bren_out(exmem_bren),
-	.u_imm_out(exmem_u_imm)
+	.u_imm_out(exmem_u_imm),
+	.pc_4_out(exmem_pc_4)
 );
 
 /*
@@ -252,7 +248,7 @@ assign wmask = exmem_controlw.mem_wmask;
 assign address_b = exmem_aluout;
 // assign wdata = exmem_rs2out;
 
-loader load_reg 
+loader load_reg
 (
 	.load_sel(exmem_controlw.funct3),
 	.in(rdata_b),
@@ -296,10 +292,12 @@ mem_wb_reg mem_wb
 	.bren_in(exmem_bren),
 	.dmemout_in(final_rdata_b),
 	.u_imm_in(exmem_u_imm),
+	.pc_4_in(exmem_pc_4),
 	.aluout_out(memwb_aluout),
 	.bren_out(memwb_bren),
 	.dmemout_out(memwb_rdata),
 	.u_imm_out(memwb_u_imm),
+	.pc_4_out(memwb_pc_4),
 	.pcmuxsel(memwb_pcmuxsel)
 );
 
@@ -308,20 +306,22 @@ mem_wb_reg mem_wb
  */
 
 
-mux4 memwb_mux
+mux8 memwb_mux
 (
 	.sel(memwb_controlw.memwbmux_sel),
 	.a(memwb_aluout),
 	.b(memwb_bren),
 	.c(memwb_u_imm),
 	.d(memwb_rdata),
-	.f(memwbmux_out)
+	.e(memwb_pc_4),
+	.f(),
+	.g(),
+	.h(),
+	.q(memwbmux_out)
 );
 
 /*
  * TODO:
- * 1. Verify that there are no race conditions in pipeline registers while r/w
- * 2. Incorporate data hazard handling logic
- * 3. Stall on mem_resp
+ * 1, Data memory hit and instruction memory miss at the same time probably doesn't work
  */
 endmodule
