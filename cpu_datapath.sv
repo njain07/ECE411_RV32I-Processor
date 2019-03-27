@@ -258,8 +258,9 @@ loader load_reg
 
 shifter shift_data
 (
-	.sel(wmask),
+	.sel(exmem_controlw.funct3),
 	.in(exmem_rs2out),
+	.address(address_b),
 	.out(wdata)
 );
 
