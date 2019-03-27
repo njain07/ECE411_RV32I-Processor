@@ -22,7 +22,7 @@ module cpu_datapath
 
 //Internal signals
 //IF
-logic [31:0] pc_plus4, pcmux_out, pc_out, pc_sync_out, instr_out, nop;
+logic [31:0] pc_plus4, pcmux_out, pc_out, pc_sync_out, instr_mdr_out, nop;
 logic pc_load;
 //IF_ID
 logic [31:0] ifid_instr, ifid_pc, ifid_pc_4, ifid_pc_sync;
@@ -47,7 +47,7 @@ logic load;
 logic [31:0] final_rdata_b;
 logic [31:0] final_wdata;
 //Mem_WB
-logic [31:0] memwb_aluout, memwb_bren, memwb_rdata, memwb_u_imm, memwb_pc_4;
+logic [31:0] memwb_aluout, memwb_bren, memwb_rdata, memwb_u_imm, memwb_pc_4, data_mdr_out;
 logic [31:0] bren_sync, aluout_sync, controlw_sync, u_imm_sync;
 //WB
 logic [31:0] memwbmux_out;
@@ -62,8 +62,22 @@ rv32i_control_word controlw, idex_controlw, exmem_controlw, memwb_controlw;
 
 assign nop = 32'h00000013;
 assign pc_plus4 = pc_out + 4;
-assign read_a = 1; //to be changed
+// assign read_a = ; //to be changed
 assign address_a = pc_out;
+
+initial begin
+	read_a = 1;
+end
+
+always_ff @ (posedge clk)
+begin
+	if (load)
+		read_a <= 1;
+	else
+		if (resp_a)
+			read_a <= 0;
+end
+
 
 cpu_control ctrl
 (
@@ -82,32 +96,34 @@ mux2 pcmux
 pc_register pc
 (
     .clk,
-    .load(pc_load), //needs to be changed
+    .load, //needs to be changed
     .in(pcmux_out),
     .out(pc_out)
 );
 
-mux2 nop_mux
-(
-	.sel(~pc_load),
-	.a(rdata_a),
-	.b(nop),
-	.f(instr_out)
-);
-
-// register pc_sync
+// register instr_mdr
 // (
 // 	.clk,
-// 	.load,
-// 	.in(pc_out),
-// 	.out(pc_sync_out)
-// ); //hacky, talk to TA
+// 	.load(resp_a),
+// 	.in(rdata_a),
+// 	.out(instr_mdr_out)
+// );
+
+// mux2 nop_mux
+// (
+// 	.sel(~pc_load),
+// 	.a(rdata_a),
+// 	.b(nop),
+// 	.f(instr_out)
+// );
+
+
 
 if_id_reg if_id
 (
 	.clk,
 	.load, //to be changed for data hazards
-	.instr_in(instr_out),
+	.instr_in(rdata_a),
 	.pc_in(pc_out),
 	.pc_4_in(pc_plus4),
 	.instr_out(ifid_instr),
@@ -271,24 +287,15 @@ shifter shift_data
 	.out(wdata)
 );
 
-mem_stall stall (.*);
-
-// mem_wb_reg mem_sync
+// register data_mdr
 // (
 // 	.clk,
-// 	.load, //to be changed
-// 	.controlw_in (exmem_controlw),
-// 	.controlw_out(controlw_sync),
-// 	.aluout_in(exmem_aluout),
-// 	.bren_in(exmem_bren),
-// 	.dmemout_in(),
-// 	.u_imm_in(exmem_u_imm),
-// 	.aluout_out(aluout_sync),
-// 	.bren_out(bren_sync),
-// 	.dmemout_out(),
-// 	.u_imm_out(u_imm_sync),
-// 	.pcmuxsel()
-// ); //hacky, talk to TA
+// 	.load(resp_b),
+// 	.in(rdata_b),
+// 	.out(data_mdr_out)
+// );
+
+mem_stall stall (.*);
 
 mem_wb_reg mem_wb
 (

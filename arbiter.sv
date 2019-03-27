@@ -22,6 +22,7 @@ module cache_arbiter
   	output logic [31:0]   	pmem_address
 );
 
+
 always_comb
 begin
 	pmem_wdata = pmem_wdata_b;

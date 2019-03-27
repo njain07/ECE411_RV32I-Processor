@@ -21,10 +21,11 @@ begin
         end
         3'b001:begin
             case(address[1])
-                0: out = in
-                1: out = in <<16;
+                0: out = in;
+                1: out = in << 16 ;
             endcase
         end
+        default: out = in;
     endcase
 end
 

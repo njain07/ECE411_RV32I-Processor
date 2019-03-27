@@ -6,19 +6,20 @@ module mem_stall
                 write,
                 resp_a,
                 resp_b,
-  output logic  load,
-                pc_load
+  output logic  load
 );
 
-always_comb
-begin
-    if (read_b || write) begin
-        load = resp_b;
-        pc_load = resp_a;
-    end else begin
-        pc_load = resp_a;
-        load = resp_a;
-    end
+logic load_a, load_b;
+always_comb begin
+    load_a = 1;
+    load_b = 1;
+    if (read_b || write)
+        load_b = resp_b;
+    if (read_a)
+        load_a = resp_a;
+    load = load_a && load_b;
 end
+
+
 
 endmodule
