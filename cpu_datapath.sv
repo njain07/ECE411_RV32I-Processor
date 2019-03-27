@@ -252,7 +252,6 @@ ex_mem_reg ex_mem
 
 
 assign read_b = exmem_controlw.mem_read;
-assign write = exmem_controlw.mem_write;
 assign address_b = exmem_aluout;
 // assign wdata = exmem_rs2out;
 
