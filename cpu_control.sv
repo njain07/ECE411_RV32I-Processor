@@ -43,15 +43,21 @@ begin
 			cword.aluop = alu_add;
 		end
 
-//		op_jal : begin
-//  	end
+		op_jal : begin
+			cword.alumux1_sel = 1;
+			cword.alumux2_sel = 5;
+			cword.aluop = alu_add;
+ 		end
 
-//		op_jalr : begin
-//		end
+		op_jalr : begin
+			cword.alumux1_sel = 0;
+			cword.alumux2_sel = 5;
+			cword.aluop = alu_add;
+		end
 
 		op_br : begin
 			cword.alumux1_sel = 1;
-			cword.alumux2_sel = 2;
+			cword.alumux2_sel = 1;
 			cword.aluop = alu_add;
 		end
 
