@@ -227,10 +227,6 @@ add wave -noupdate -group arbiter /mp3_tb/dut/cache/arbiter/pmem_write
 add wave -noupdate -group arbiter /mp3_tb/dut/cache/arbiter/pmem_rdata
 add wave -noupdate -group arbiter /mp3_tb/dut/cache/arbiter/pmem_wdata
 add wave -noupdate -group arbiter /mp3_tb/dut/cache/arbiter/pmem_address
-add wave -noupdate -expand -group nopmux /mp3_tb/dut/datapath/nop_mux/sel
-add wave -noupdate -expand -group nopmux /mp3_tb/dut/datapath/nop_mux/a
-add wave -noupdate -expand -group nopmux /mp3_tb/dut/datapath/nop_mux/b
-add wave -noupdate -expand -group nopmux /mp3_tb/dut/datapath/nop_mux/f
 TreeUpdate [SetDefaultTree]
 WaveRestoreCursors {{Cursor 1} {2991191 ps} 0}
 quietly wave cursor active 1

@@ -72,14 +72,14 @@ fetch_stall_test:
    nop
    nop
    nop
-   sw x7, %lo(TOTAL)(x8)
-   lw x1, %lo(TOTAL)(x8)
+   sb x7, %lo(TOTAL)(x2)
+   lh x1, %lo(TOTAL)(x8)
 inf:
    beq x0, x0, inf
    nop
    nop
    # cache line boundary
-	
+
 .section .rodata
 .balign 256
 DataSeg:

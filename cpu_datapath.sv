@@ -22,7 +22,7 @@ module cpu_datapath
 
 //Internal signals
 //IF
-logic [31:0] pc_plus4, pcmux_out, pc_out, pc_sync_out, instr_mdr_out, nop;
+logic [31:0] pc_plus4, pcmux_out, pc_out, pc_sync_out, pc_4_sync, instr_mdr_out, nop;
 logic pc_load;
 //IF_ID
 logic [31:0] ifid_instr, ifid_pc, ifid_pc_4, ifid_pc_sync;
@@ -60,7 +60,7 @@ rv32i_control_word controlw, idex_controlw, exmem_controlw, memwb_controlw;
  * Instruction fetch
  */
 
-assign nop = 32'h00000013;
+// assign nop = 32'h00000013;
 assign pc_plus4 = pc_out + 4;
 // assign read_a = ; //to be changed
 assign address_a = pc_out;
@@ -101,13 +101,17 @@ pc_register pc
     .out(pc_out)
 );
 
-// register instr_mdr
-// (
-// 	.clk,
-// 	.load(resp_a),
-// 	.in(rdata_a),
-// 	.out(instr_mdr_out)
-// );
+if_id_reg ifid_sync
+(
+	.clk,
+	.load(resp_a), //to be changed for data hazards
+	.instr_in(rdata_a),
+	.pc_in(pc_out),
+	.pc_4_in(pc_plus4),
+	.instr_out(instr_mdr_out),
+	.pc_out(pc_sync_out),
+	.pc_4_out(pc_4_sync)
+);
 
 // mux2 nop_mux
 // (
@@ -123,9 +127,9 @@ if_id_reg if_id
 (
 	.clk,
 	.load, //to be changed for data hazards
-	.instr_in(rdata_a),
-	.pc_in(pc_out),
-	.pc_4_in(pc_plus4),
+	.instr_in(instr_mdr_out),
+	.pc_in(pc_sync_out),
+	.pc_4_in(pc_4_sync),
 	.instr_out(ifid_instr),
 	.pc_out(ifid_pc),
 	.pc_4_out(ifid_pc_4)
@@ -265,10 +269,9 @@ ex_mem_reg ex_mem
  * Memory
  */
 
-
-
 assign read_b = exmem_controlw.mem_read;
 assign address_b = exmem_aluout;
+assign write = exmem_controlw.mem_write;
 // assign wdata = exmem_rs2out;
 
 loader load_reg
@@ -284,7 +287,8 @@ shifter shift_data
 	.sel(exmem_controlw.funct3),
 	.in(exmem_rs2out),
 	.address(address_b),
-	.out(wdata)
+	.out(wdata),
+	.wmask
 );
 
 // register data_mdr
