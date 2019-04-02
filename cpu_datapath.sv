@@ -205,6 +205,14 @@ id_ex_reg id_ex
  * Execute
  */
 
+forwarding_unit forward
+(
+	.*,
+	.rs1(idex_rs1),
+	.rs2(idex_rs2)
+);
+
+
 mux2 cmpmux
 (
     .sel(idex_controlw.cmpmux_sel),
@@ -229,7 +237,7 @@ alu alu
     .f(alu_out)
 );
 
-mux4 #(.width(1)) alumux1
+mux4 alumux1
 (
     .sel({forwardA[1],alumux1_sel_0}),
     .a(idex_rs1out),
@@ -253,12 +261,12 @@ mux8 alumux2
     .q(alumux2_out)
 );
 
-mux2 mux_forwardA
+mux2 #(.width(1)) mux_forwardA
 (
 	.sel(forwardA[1]),
 	.a(idex_controlw.alumux1_sel),
 	.b(forwardA[0]),
-	.c(alumux1_sel_0)
+	.f(alumux1_sel_0)
 );
 
 mux4 mux_forwardB

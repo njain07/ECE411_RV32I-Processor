@@ -59,7 +59,7 @@ module id_ex_reg
                         rs1out_in,
                         rs2out_in,
 
-  input logic [4:0]     rs1_in, 
+  input logic [4:0]     rs1_in,
                         rs2_in,
 
   input logic [2:0]     funct3_in,
@@ -76,7 +76,7 @@ module id_ex_reg
                         rs1out_out,
                         rs2out_out,
 
-  output logic [4:0]    rs1_out, 
+  output logic [4:0]    rs1_out,
                         rs2_out,
 
   output logic [2:0]    funct3_out,
@@ -85,23 +85,26 @@ module id_ex_reg
 
 rv32i_control_word controlw;
 logic [2:0] funct3;
+logic [4:0] rs1, rs2;
 logic [6:0] funct7;
 logic [31:0] pc, pc_plus_4, i_imm;
 logic [31:0] s_imm, b_imm, u_imm, j_imm, rs1out, rs2out;
 
 initial
 begin
-    pc = 32'b0;
-    pc_plus_4 = 32'b0;
-    i_imm = 32'b0;
-    s_imm = 32'b0;
-    b_imm = 32'b0;
-    u_imm = 32'b0;
-    j_imm = 32'b0;
-    rs1out = 32'b0;
-    rs2out = 32'b0;
-    funct3 = 3'b0;
-    funct7 = 7'b0;
+    pc = 32'd0;
+    pc_plus_4 = 32'd0;
+    i_imm = 32'd0;
+    s_imm = 32'd0;
+    b_imm = 32'd0;
+    u_imm = 32'd0;
+    j_imm = 32'd0;
+    rs1out = 32'd0;
+    rs2out = 32'd0;
+    funct3 = 3'd0;
+    funct7 = 7'd0;
+    rs1 = 5'd0;
+    rs2 = 5'd0;
 end
 
 always_ff @(posedge clk)
@@ -120,6 +123,8 @@ begin
       funct3 <= funct3_in;
       funct7 <= funct7_in;
       controlw <= controlw_in;
+      rs1 <= rs1_in;
+      rs2 <= rs2_in;
     end
 end
 
@@ -137,6 +142,8 @@ begin
     funct3_out = funct3;
     funct7_out = funct7;
     controlw_out = controlw;
+    rs1_out = rs1;
+    rs2_out = rs2;
 end
 
 endmodule : id_ex_reg

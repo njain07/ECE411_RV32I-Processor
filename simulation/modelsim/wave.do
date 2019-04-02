@@ -228,8 +228,20 @@ add wave -noupdate -group arbiter /mp3_tb/dut/cache/arbiter/mem_write
 add wave -noupdate -group arbiter /mp3_tb/dut/cache/arbiter/mem_rdata
 add wave -noupdate -group arbiter /mp3_tb/dut/cache/arbiter/mem_wdata
 add wave -noupdate -group arbiter /mp3_tb/dut/cache/arbiter/mem_address
+add wave -noupdate -expand -group fwd /mp3_tb/dut/datapath/forward/exmem_controlw
+add wave -noupdate -expand -group fwd /mp3_tb/dut/datapath/forward/memwb_controlw
+add wave -noupdate -expand -group fwd /mp3_tb/dut/datapath/forward/exmem_aluout
+add wave -noupdate -expand -group fwd /mp3_tb/dut/datapath/forward/memwb_aluout
+add wave -noupdate -expand -group fwd /mp3_tb/dut/datapath/forward/rs1
+add wave -noupdate -expand -group fwd /mp3_tb/dut/datapath/forward/rs2
+add wave -noupdate -expand -group fwd /mp3_tb/dut/datapath/forward/forwardA
+add wave -noupdate -expand -group fwd /mp3_tb/dut/datapath/forward/forwardB
+add wave -noupdate -expand -group fwd /mp3_tb/dut/datapath/forward/ex_forwardA
+add wave -noupdate -expand -group fwd /mp3_tb/dut/datapath/forward/ex_forwardB
+add wave -noupdate -expand -group fwd /mp3_tb/dut/datapath/forward/wb_forwardA
+add wave -noupdate -expand -group fwd /mp3_tb/dut/datapath/forward/wb_forwardB
 TreeUpdate [SetDefaultTree]
-WaveRestoreCursors {{Cursor 1} {2991191 ps} 0}
+WaveRestoreCursors {{Cursor 1} {4884865 ps} 0}
 quietly wave cursor active 1
 configure wave -namecolwidth 150
 configure wave -valuecolwidth 159
@@ -245,4 +257,4 @@ configure wave -griddelta 40
 configure wave -timeline 0
 configure wave -timelineunits ns
 update
-WaveRestoreZoom {2874600 ps} {3006601 ps}
+WaveRestoreZoom {0 ps} {5250 ns}
