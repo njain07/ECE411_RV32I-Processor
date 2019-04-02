@@ -36,6 +36,7 @@ logic [4:0] rs1, rs2, rd;
 logic [31:0] rs1_out, rs2_out;
 //ID_EX
 logic [2:0] idex_funct3;
+logic [4:0] idex_rs1, idex_rs2;
 logic [6:0] idex_funct7;
 logic [31:0] idex_i_imm, idex_s_imm, idex_b_imm, idex_u_imm, idex_j_imm;
 logic [31:0] idex_rs1out, idex_rs2out, idex_pc, idex_pc_4;
@@ -43,8 +44,7 @@ logic [31:0] idex_rs1out, idex_rs2out, idex_pc, idex_pc_4;
 logic br_en;
 logic [31:0] cmpmux_out, alumux1_out, alumux2_out, alu_out,mux_forwardB_out;
 logic alumux1_sel_0;
-logic [1:0] forwardA;
-logic[1:0] forwardB;
+logic [1:0] forwardA, forwardB;
 //EX_MEM
 logic [31:0] exmem_aluout, exmem_rs2out, exmem_bren, exmem_u_imm, exmem_pc_4;
 logic load;
@@ -182,6 +182,8 @@ id_ex_reg id_ex
 	.j_imm_in(j_imm),
 	.rs1out_in(rs1_out),
 	.rs2out_in(rs2_out),
+	.rs1_in(rs1),
+	.rs2_in(rs2),
 	.funct3_in(funct3),
 	.funct7_in(funct7),
 	.pc_out (idex_pc),
@@ -193,6 +195,8 @@ id_ex_reg id_ex
 	.j_imm_out(idex_j_imm),
 	.rs1out_out(idex_rs1out),
 	.rs2out_out(idex_rs2out),
+	.rs1_out(idex_rs1),
+	.rs2_out(idex_rs2),
 	.funct3_out(idex_funct3),
 	.funct7_out(idex_funct7)
 );
@@ -225,13 +229,13 @@ alu alu
     .f(alu_out)
 );
 
-mux4 alumux1
+mux4 #(.width(1)) alumux1
 (
     .sel({forwardA[1],alumux1_sel_0}),
     .a(idex_rs1out),
     .b(idex_pc),
-		.c(memwb_aluout),
-		.d(exmem_aluout)
+	.c(exmem_aluout),
+	.d(memwb_aluout),
     .f(alumux1_out)
 );
 
@@ -255,7 +259,6 @@ mux2 mux_forwardA
 	.a(idex_controlw.alumux1_sel),
 	.b(forwardA[0]),
 	.c(alumux1_sel_0)
-
 );
 
 mux4 mux_forwardB
@@ -263,10 +266,10 @@ mux4 mux_forwardB
 	.sel(forwardB),
 	.a(alumux2_out),
 	.b(alumux2_out),
-	.c(memwb_aluout),
-	.d(exmem_aluout)
+	.c(exmem_aluout),
+	.d(memwb_aluout),
 	.f(mux_forwardB_out)
-	);
+);
 
 ex_mem_reg ex_mem
 (

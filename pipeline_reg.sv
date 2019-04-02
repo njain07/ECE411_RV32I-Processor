@@ -59,6 +59,9 @@ module id_ex_reg
                         rs1out_in,
                         rs2out_in,
 
+  input logic [4:0]     rs1_in, 
+                        rs2_in,
+
   input logic [2:0]     funct3_in,
   input logic [6:0]     funct7_in,
 
@@ -72,6 +75,9 @@ module id_ex_reg
                         j_imm_out,
                         rs1out_out,
                         rs2out_out,
+
+  output logic [4:0]    rs1_out, 
+                        rs2_out,
 
   output logic [2:0]    funct3_out,
   output logic [6:0]    funct7_out
