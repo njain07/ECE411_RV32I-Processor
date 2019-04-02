@@ -25,7 +25,7 @@ module cpu_datapath
 logic [31:0] pc_plus4, pcmux_out, pc_out, pc_sync_out, pc_4_sync, instr_mdr_out, nop;
 logic pc_load;
 //IF_ID
-logic [31:0] ifid_instr, ifid_pc, ifid_pc_4, ifid_pc_sync;
+logic [31:0] ifid_instr, ifid_pc, ifid_pc_4, ifid_pc_sync, ifid_pc4_sync;
 //ID
 rv32i_opcode opcode;
 logic [2:0] funct3;
@@ -62,7 +62,6 @@ rv32i_control_word controlw, idex_controlw, exmem_controlw, memwb_controlw;
 
 // assign nop = 32'h00000013;
 assign pc_plus4 = pc_out + 4;
-// assign read_a = ; //to be changed
 assign address_a = pc_out;
 
 initial begin
@@ -165,7 +164,15 @@ register id_pc_sync
 	.load,
 	.in(ifid_pc),
 	.out(ifid_pc_sync)
-); //hacky, talk to TA
+);
+
+register id_pc4_sync
+(
+	.clk,
+	.load,
+	.in(ifid_pc_4),
+	.out(ifid_pc4_sync)
+);
 
 id_ex_reg id_ex
 (
@@ -174,7 +181,7 @@ id_ex_reg id_ex
 	.controlw_in(controlw),
 	.controlw_out(idex_controlw),
 	.pc_in(ifid_pc_sync),
-	.pc_4_in(ifid_pc_4),
+	.pc_4_in(ifid_pc4_sync),
 	.i_imm_in(i_imm),
 	.s_imm_in(s_imm),
 	.b_imm_in(b_imm),
@@ -272,7 +279,6 @@ ex_mem_reg ex_mem
 assign read_b = exmem_controlw.mem_read;
 assign address_b = exmem_aluout;
 assign write = exmem_controlw.mem_write;
-// assign wdata = exmem_rs2out;
 
 loader load_reg
 (
@@ -291,13 +297,6 @@ shifter shift_data
 	.wmask
 );
 
-// register data_mdr
-// (
-// 	.clk,
-// 	.load(resp_b),
-// 	.in(rdata_b),
-// 	.out(data_mdr_out)
-// );
 
 mem_stall stall (.*);
 

@@ -32,8 +32,13 @@ logic pmem_read_a, pmem_resp_a, pmem_read_b, pmem_resp_b, pmem_write_b;
 logic [31:0] pmem_addr_a, pmem_addr_b;
 logic [255:0] pmem_rdata_a, pmem_rdata_b, pmem_wdata_b;
 
+logic mem_resp, mem_read, mem_write;
+logic [31:0] mem_address;
+logic [255:0] mem_rdata, mem_wdata;
+
 instr_cache instr_cache (.*);
 data_cache data_cache (.*);
+l2_cache l2_cache (.*);
 cache_arbiter arbiter (.*);
 
 endmodule : cache

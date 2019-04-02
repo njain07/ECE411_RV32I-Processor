@@ -1,6 +1,6 @@
 module cache_l2_datapath #(
     parameter s_offset = 5,
-    parameter s_index  = 3,
+    parameter s_index  = 5,
     parameter s_tag    = 32 - s_offset - s_index,
     parameter s_mask   = 2**s_offset,
     parameter s_line   = 8*s_mask,
@@ -53,13 +53,13 @@ logic [s_mask-1:0] data1_load, data2_load, data_load256, data_load;
  */
 assign offset = mem_address[s_offset-1:0];
 assign set = mem_address[s_offset+s_index-1:s_offset];
-assign tag_addr = [31:s_offset+s_index];
+assign tag_addr = mem_address[31:s_offset+s_index];
 
 /*
  * Valid
  */
 
-array valid[1:0]
+array #(.s_index(s_index)) valid[1:0]
 (
     clk,
     array_read,
@@ -72,7 +72,7 @@ array valid[1:0]
 /*
  * LRU
  */
-array lru
+array #(.s_index(s_index)) lru
 (
   .clk,
   .read(array_read),
@@ -86,7 +86,7 @@ array lru
  * Dirty
  */
 
-array dirty[1:0]
+array #(.s_index(s_index)) dirty[1:0]
 (
     clk,
     array_read,
@@ -100,7 +100,7 @@ array dirty[1:0]
  * Tag
  */
 
-array #(.width(24)) tag[1:0]
+array #(.width(s_tag), .s_index(s_index)) tag[1:0]
 (
     clk,
     array_read,
@@ -111,7 +111,7 @@ array #(.width(24)) tag[1:0]
 );
 
 
-mux2 #(.width(24)) tagmux
+mux2 #(.width(s_tag)) tagmux
 (
   .sel(lru_out),
   .a(tag1_out),
@@ -143,7 +143,7 @@ mux2 pmemaddr_mux
  * Data
 */
 
-data_array line[1:0]
+data_array #(.s_index(s_index)) line[1:0]
 (
     clk,
     array_read,
