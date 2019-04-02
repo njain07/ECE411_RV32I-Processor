@@ -6,6 +6,7 @@ module cpu_datapath
 						resp_a,
 						resp_b,
 
+
 	input logic	[31:0]	rdata_a,
 						rdata_b,
 
@@ -40,7 +41,10 @@ logic [31:0] idex_i_imm, idex_s_imm, idex_b_imm, idex_u_imm, idex_j_imm;
 logic [31:0] idex_rs1out, idex_rs2out, idex_pc, idex_pc_4;
 //EX
 logic br_en;
-logic [31:0] cmpmux_out, alumux1_out, alumux2_out, alu_out;
+logic [31:0] cmpmux_out, alumux1_out, alumux2_out, alu_out,mux_forwardB_out;
+logic alumux1_sel_0;
+logic [1:0] forwardA;
+logic[1:0] forwardB;
 //EX_MEM
 logic [31:0] exmem_aluout, exmem_rs2out, exmem_bren, exmem_u_imm, exmem_pc_4;
 logic load;
@@ -217,15 +221,17 @@ alu alu
 (
     .aluop(idex_controlw.aluop),
     .a(alumux1_out),
-    .b(alumux2_out),
+    .b(mux_forwardB_out), //alumux2_out was replaced with forwarded values
     .f(alu_out)
 );
 
-mux2 alumux1
+mux4 alumux1
 (
-    .sel(idex_controlw.alumux1_sel),
+    .sel({forwardA[1],alumux1_sel_0}),
     .a(idex_rs1out),
     .b(idex_pc),
+		.c(memwb_aluout),
+		.d(exmem_aluout)
     .f(alumux1_out)
 );
 
@@ -242,6 +248,25 @@ mux8 alumux2
     .h(),
     .q(alumux2_out)
 );
+
+mux2 mux_forwardA
+(
+	.sel(forwardA[1]),
+	.a(idex_controlw.alumux1_sel),
+	.b(forwardA[0]),
+	.c(alumux1_sel_0)
+
+);
+
+mux4 mux_forwardB
+(
+	.sel(forwardB),
+	.a(alumux2_out),
+	.b(alumux2_out),
+	.c(memwb_aluout),
+	.d(exmem_aluout)
+	.f(mux_forwardB_out)
+	);
 
 ex_mem_reg ex_mem
 (
