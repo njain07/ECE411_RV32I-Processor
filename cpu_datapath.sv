@@ -64,18 +64,7 @@ rv32i_control_word controlw, idex_controlw, exmem_controlw, memwb_controlw;
 assign pc_plus4 = pc_out + 4;
 assign address_a = pc_out;
 
-initial begin
-	read_a = 1;
-end
-
-always_ff @ (posedge clk)
-begin
-	if (load)
-		read_a <= 1;
-	else
-		if (resp_a)
-			read_a <= 0;
-end
+instr_read instr_read (.*);
 
 
 cpu_control ctrl
@@ -338,8 +327,4 @@ mux8 memwb_mux
 	.q(memwbmux_out)
 );
 
-/*
- * TODO:
- * 1, Data memory hit and instruction memory miss at the same time probably doesn't work
- */
 endmodule
