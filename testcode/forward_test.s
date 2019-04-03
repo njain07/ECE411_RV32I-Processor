@@ -21,9 +21,15 @@ addi x6,x6,8
 sub   x2, x1,x3 #3
 and   x12,x2,x5 #2
 or    x13,x6,x12 #10
-add   x14,x13,x13 #10
+add   x14,x13,x13 #14
 
 end:
+	 nop
+	 nop
+	 nop
+	 nop
+	 nop
+	 nop
 	 beq x0, x0, end
 
 .section .rodata

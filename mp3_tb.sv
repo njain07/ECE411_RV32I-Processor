@@ -49,7 +49,7 @@ begin
     //     write_data = 32'hx;
     //     write = 0;
     // end
-    // if (halt) $finish;
+    if (halt) $finish;
     // if (dut.load_pc) order = order + 1;
 end
 

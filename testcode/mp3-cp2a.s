@@ -4,22 +4,22 @@
 .globl _start
 _start:
     beq x0, x0, ldr_str_test
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
+    # nop
+    # nop
+    # nop
+    # nop
+    # nop
+    # nop
+    # nop
     # cache line boundary
 
 ldr_str_test:
    add x8, x0, x0 # addi x8, x0, %lo(DataSeg)
-   nop
-   nop
-   nop
-   nop
-   nop
+   # nop
+   # nop
+   # nop
+   # nop
+   # nop
    lw x1, %lo(W)(x8)
    lw x3, %lo(Y)(x8)
    # cache line boundary
@@ -36,10 +36,18 @@ ldr_str_test:
    lw x2, %lo(X)(x8)
    lw x3, %lo(Y)(x8)
    lw x4, %lo(Z)(x8)
+   nop
+   nop
+   nop
+   nop
+   add x3, x3, x3
+   add x3, x3, x3
+   add x3, x3, x3
    beq x0, x0, fetch_stall_test
-   nop
-   nop
-   nop
+
+   # nop
+   # nop
+   # nop
    # cache line boundary
    nop
    nop
@@ -79,7 +87,7 @@ inf:
    nop
    nop
    # cache line boundary
-	
+
 .section .rodata
 .balign 256
 DataSeg:

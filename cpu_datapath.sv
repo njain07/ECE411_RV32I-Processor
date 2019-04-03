@@ -41,6 +41,7 @@ logic [6:0] idex_funct7;
 logic [31:0] idex_i_imm, idex_s_imm, idex_b_imm, idex_u_imm, idex_j_imm;
 logic [31:0] idex_rs1out, idex_rs2out, idex_pc, idex_pc_4;
 //EX
+logic pcmuxsel;
 logic br_en;
 logic [31:0] cmpmux_out, alumux1_out, alumux2_out, alu_out,mux_forwardB_out;
 logic alumux1_sel_0;
@@ -55,7 +56,7 @@ logic [31:0] memwb_aluout, memwb_bren, memwb_rdata, memwb_u_imm, memwb_pc_4, dat
 logic [31:0] bren_sync, aluout_sync, controlw_sync, u_imm_sync;
 //WB
 logic [31:0] memwbmux_out;
-logic 		 memwb_pcmuxsel;
+
 
 //Control
 rv32i_control_word controlw, idex_controlw, exmem_controlw, memwb_controlw;
@@ -79,9 +80,9 @@ cpu_control ctrl
 
 mux2 pcmux
 (
-    .sel(memwb_pcmuxsel),
+    .sel(pcmuxsel),
     .a(pc_plus4),
-    .b(memwb_aluout),
+    .b(alu_out),
     .f(pcmux_out)
 );
 
@@ -100,6 +101,7 @@ if_id_reg ifid_sync
 	.instr_in(rdata_a),
 	.pc_in(pc_out),
 	.pc_4_in(pc_plus4),
+	.flush(pcmuxsel),
 	.instr_out(instr_mdr_out),
 	.pc_out(pc_sync_out),
 	.pc_4_out(pc_4_sync)
@@ -122,6 +124,7 @@ if_id_reg if_id
 	.instr_in(instr_mdr_out),
 	.pc_in(pc_sync_out),
 	.pc_4_in(pc_4_sync),
+	.flush(pcmuxsel),
 	.instr_out(ifid_instr),
 	.pc_out(ifid_pc),
 	.pc_4_out(ifid_pc_4)
@@ -186,6 +189,7 @@ id_ex_reg id_ex
 	.rs2_in(rs2),
 	.funct3_in(funct3),
 	.funct7_in(funct7),
+	.flush(pcmuxsel),
 	.pc_out (idex_pc),
 	.pc_4_out(idex_pc_4),
 	.i_imm_out(idex_i_imm),
@@ -204,6 +208,11 @@ id_ex_reg id_ex
 /*
  * Execute
  */
+
+assign pcmuxsel = (idex_controlw.opcode == op_jal) ||
+					(idex_controlw.opcode == op_jalr) ||
+					((idex_controlw.opcode == op_br) & br_en);
+
 
 forwarding_unit forward
 (
@@ -340,8 +349,7 @@ mem_wb_reg mem_wb
 	.bren_out(memwb_bren),
 	.dmemout_out(memwb_rdata),
 	.u_imm_out(memwb_u_imm),
-	.pc_4_out(memwb_pc_4),
-	.pcmuxsel(memwb_pcmuxsel)
+	.pc_4_out(memwb_pc_4)
 );
 
 /*
@@ -364,3 +372,9 @@ mux8 memwb_mux
 );
 
 endmodule
+
+/*
+ * TODO:
+ * 1. Add a signal to control word if instr is jump/branch
+ * 2. Dont forward for on instructions that dont use rs2 (check alumuxsel)
+ * 3. Make test case for l2 cache. Use mp2-cp2

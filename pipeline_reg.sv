@@ -4,6 +4,7 @@ module if_id_reg
 (
   input logic           clk,
                         load,
+                        flush,
   input logic [31:0]    instr_in,
                         pc_in,
                         pc_4_in,
@@ -12,7 +13,7 @@ module if_id_reg
                         pc_4_out
 );
 
-logic [31:0] instr, pc, pc_plus_4;
+logic [31:0] instr, pc, pc_plus_4, nop;
 
 initial
 begin
@@ -20,6 +21,8 @@ begin
     pc = 32'b0;
     pc_plus_4 = 32'b0;
 end
+
+assign nop = 32'h00000013;
 
 always_ff @(posedge clk)
 begin
@@ -33,7 +36,7 @@ end
 
 always_comb
 begin
-    instr_out = instr;
+    instr_out = flush ? nop : instr;
     pc_out = pc;
     pc_4_out = pc_plus_4;
 end
@@ -45,6 +48,7 @@ module id_ex_reg
 (
   input logic           clk,
                         load,
+                        flush,
 
   input rv32i_control_word controlw_in,
   output rv32i_control_word controlw_out,
@@ -122,7 +126,7 @@ begin
       rs2out <= rs2out_in;
       funct3 <= funct3_in;
       funct7 <= funct7_in;
-      controlw <= controlw_in;
+      controlw <= controlw_in & { {32{~flush}} };
       rs1 <= rs1_in;
       rs2 <= rs2_in;
     end
@@ -225,8 +229,7 @@ module mem_wb_reg
                       bren_out,
                       dmemout_out,
                       u_imm_out,
-                      pc_4_out,
-  output logic        pcmuxsel
+                      pc_4_out
 );
 
 rv32i_control_word controlw;
@@ -241,7 +244,7 @@ begin
     pc_plus_4 = 32'b0;
 end
 
-assign pcmuxsel = (controlw.opcode == op_jal) || (controlw.opcode == op_jalr) || (controlw.opcode == op_br && (bren[0]));
+// assign pcmuxsel = (controlw.opcode == op_jal) || (controlw.opcode == op_jalr) || (controlw.opcode == op_br && (bren[0]));
 
 always_ff @(posedge clk)
 begin
