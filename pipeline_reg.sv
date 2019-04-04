@@ -126,7 +126,7 @@ begin
       rs2out <= rs2out_in;
       funct3 <= funct3_in;
       funct7 <= funct7_in;
-      controlw <= controlw_in & { {32{~flush}} };
+      controlw <= controlw_in & { {64{~flush}} };
       rs1 <= rs1_in;
       rs2 <= rs2_in;
     end

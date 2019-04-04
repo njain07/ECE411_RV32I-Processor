@@ -41,11 +41,10 @@ logic [6:0] idex_funct7;
 logic [31:0] idex_i_imm, idex_s_imm, idex_b_imm, idex_u_imm, idex_j_imm;
 logic [31:0] idex_rs1out, idex_rs2out, idex_pc, idex_pc_4;
 //EX
-logic pcmuxsel;
-logic br_en;
-logic [31:0] cmpmux_out, alumux1_out, alumux2_out, alu_out,mux_forwardB_out;
-logic alumux1_sel_0;
-logic [1:0] forwardA, forwardB;
+logic pcmuxsel, br_en;
+logic [31:0] cmpmux_out, alumux1_out, alumux2_out, alu_out;
+logic [31:0] mux_forwardA_out, mux_forwardB_out
+logic [2:0] forwardA, forwardB;
 //EX_MEM
 logic [31:0] exmem_aluout, exmem_rs2out, exmem_bren, exmem_u_imm, exmem_pc_4;
 logic load;
@@ -209,15 +208,9 @@ id_ex_reg id_ex
  * Execute
  */
 
-assign pcmuxsel = (idex_controlw.opcode == op_jal) ||
-					(idex_controlw.opcode == op_jalr) ||
-					((idex_controlw.opcode == op_br) & br_en);
+assign pcmuxsel = (idex_controlw.jump) ||
+					(idex_controlw.branch & br_en);
 
-assign idex_controlw.jump = (idex_controlw.opcode == op_jal)||
-										(idex_controlw.opcode == op_jalr);
-
-assign idex_controlw.load = (idex_controlw.opcode == op_lui)||
-															(idex_controlw.opcode == op_load);
 
 forwarding_unit forward
 (
@@ -246,18 +239,16 @@ cmp cmp
 alu alu
 (
     .aluop(idex_controlw.aluop),
-    .a(alumux1_out),
+    .a(mux_forwardA_out),
     .b(mux_forwardB_out), //alumux2_out was replaced with forwarded values
     .f(alu_out)
 );
 
-mux4 alumux1
+mux2 alumux1
 (
-    .sel({forwardA[1],alumux1_sel_0}),
+    .sel(alumux1_sel),
     .a(idex_rs1out),
-    .b(idex_pc),
-	.c(exmem_aluout),
-	.d(memwb_aluout),
+    .b(idex_pc)
     .f(alumux1_out)
 );
 
@@ -275,22 +266,33 @@ mux8 alumux2
     .q(alumux2_out)
 );
 
-mux2 #(.width(1)) mux_forwardA
+
+mux8 mux_forwardA
 (
-	.sel(forwardA[1]),
-	.a(idex_controlw.alumux1_sel),
-	.b(forwardA[0]),
-	.f(alumux1_sel_0)
+	.sel(forwardA),
+	.a(alumux1_out),
+	.b(alumux1_out),
+	.c(exmem_aluout),
+	.d(memwb_aluout),
+	.e(alumux1_out),
+	.f(alumux1_out),
+	.g(final_rdata_b),
+	.h(memwb_rdata),
+	.q(mux_forwardA_out)
 );
 
-mux4 mux_forwardB
+mux8 mux_forwardB
 (
 	.sel(forwardB),
 	.a(alumux2_out),
 	.b(alumux2_out),
 	.c(exmem_aluout),
 	.d(memwb_aluout),
-	.f(mux_forwardB_out)
+	.e(alumux2_out),
+	.f(alumux2_out),
+	.g(final_rdata_b),
+	.h(memwb_rdata),
+	.q(mux_forwardB_out)
 );
 
 ex_mem_reg ex_mem
@@ -319,7 +321,7 @@ assign read_b = exmem_controlw.mem_read;
 assign address_b = exmem_aluout;
 assign write = exmem_controlw.mem_write;
 
-loader load_reg
+loader rdata_mask
 (
 	.load_sel(exmem_controlw.funct3),
 	.in(rdata_b),
@@ -383,3 +385,5 @@ endmodule
  * 1. Add a signal to control word if instr is jump/branch
  * 2. Dont forward for on instructions that dont use rs2 (check alumuxsel)
  * 3. Make test case for l2 cache. Use mp2-cp2
+ * 4. Stall on lw
+ */
