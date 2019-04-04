@@ -401,3 +401,10 @@ endmodule
  * 1. Make test case for l2 cache. Use mp2-cp2
  * 2. Stall on lw
  */
+
+ /*
+  *1. Don't forward rdata, bad pipeline design. Instead check in decode stage using the forwarding_unit
+  * unit provided in lecture.
+  *2. Use the fwding unit from lecture multiple times instead of one big forwarding unit.
+  *3. Cache needs to respond in the same cycle. squash tag_check and idle, and combinationally return dataout.
+  */
