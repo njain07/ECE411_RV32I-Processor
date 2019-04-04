@@ -43,8 +43,8 @@ logic [31:0] idex_rs1out, idex_rs2out, idex_pc, idex_pc_4;
 //EX
 logic pcmuxsel, br_en;
 logic [31:0] cmpmux_out, alumux1_out, alumux2_out, alu_out;
-logic [31:0] mux_forwardA_out, mux_forwardB_out
-logic [2:0] forwardA, forwardB;
+logic [31:0] mux_forwardA_out, mux_forwardB_out, mux_forwardRS2_out;
+logic [2:0] forwardA, forwardB, forwardRS2;
 //EX_MEM
 logic [31:0] exmem_aluout, exmem_rs2out, exmem_bren, exmem_u_imm, exmem_pc_4;
 logic load;
@@ -216,7 +216,9 @@ forwarding_unit forward
 (
 	.*,
 	.rs1(idex_rs1),
-	.rs2(idex_rs2)
+	.rs2(idex_rs2),
+	.alumux1_sel(idex_controlw.alumux1_sel),
+	.alumux2_sel(idex_controlw.alumux2_sel)
 );
 
 
@@ -240,15 +242,15 @@ alu alu
 (
     .aluop(idex_controlw.aluop),
     .a(mux_forwardA_out),
-    .b(mux_forwardB_out), //alumux2_out was replaced with forwarded values
+    .b(mux_forwardB_out),
     .f(alu_out)
 );
 
 mux2 alumux1
 (
-    .sel(alumux1_sel),
+    .sel(idex_controlw.alumux1_sel),
     .a(idex_rs1out),
-    .b(idex_pc)
+    .b(idex_pc),
     .f(alumux1_out)
 );
 
@@ -295,6 +297,20 @@ mux8 mux_forwardB
 	.q(mux_forwardB_out)
 );
 
+mux8 mux_forwardRS2
+(
+	.sel(forwardRS2),
+	.a(idex_rs2out),
+	.b(idex_rs2out),
+	.c(exmem_aluout),
+	.d(memwb_aluout),
+	.e(idex_rs2out),
+	.f(idex_rs2out),
+	.g(final_rdata_b),
+	.h(memwb_rdata),
+	.q(mux_forwardRS2_out)
+);
+
 ex_mem_reg ex_mem
 (
 	.clk,
@@ -302,7 +318,7 @@ ex_mem_reg ex_mem
 	.controlw_in (idex_controlw),
 	.controlw_out(exmem_controlw),
 	.aluout_in(alu_out),
-	.rs2out_in(idex_rs2out),
+	.rs2out_in(mux_forwardRS2_out),
 	.bren_in({ 31'd0, br_en }),
 	.u_imm_in(idex_u_imm),
 	.pc_4_in(idex_pc_4),
@@ -382,8 +398,6 @@ endmodule
 
 /*
  * TODO:
- * 1. Add a signal to control word if instr is jump/branch
- * 2. Dont forward for on instructions that dont use rs2 (check alumuxsel)
- * 3. Make test case for l2 cache. Use mp2-cp2
- * 4. Stall on lw
+ * 1. Make test case for l2 cache. Use mp2-cp2
+ * 2. Stall on lw
  */
