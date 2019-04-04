@@ -26,6 +26,8 @@ begin
 	cword.mem_write = 0;
 	cword.memwbmux_sel = 0;
 	cword.alumux2_sel = 0;
+	cword.jump = 0;
+	cword.branch = 0;
 	cword.cmpop = branch_funct3_t'(funct3);
 	cword.funct3 = funct3;
 
@@ -49,6 +51,7 @@ begin
 			cword.alumux1_sel = 1;
 			cword.alumux2_sel = 5;
 			cword.aluop = alu_add;
+			cword.jump = 1;
 		end
 
 
@@ -56,6 +59,8 @@ begin
 			cword.load_regfile = 1;
 			cword.memwbmux_sel = 4;
 			cword.aluop = alu_add;
+			cword.jump = 1;
+
 		end
 
 
@@ -63,6 +68,7 @@ begin
 			cword.alumux1_sel = 1;
 			cword.alumux2_sel = 2;
 			cword.aluop = alu_add;
+			cword.branch = 1;
 		end
 
 		op_load : begin

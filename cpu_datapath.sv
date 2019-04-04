@@ -213,6 +213,11 @@ assign pcmuxsel = (idex_controlw.opcode == op_jal) ||
 					(idex_controlw.opcode == op_jalr) ||
 					((idex_controlw.opcode == op_br) & br_en);
 
+assign idex_controlw.jump = (idex_controlw.opcode == op_jal)||
+										(idex_controlw.opcode == op_jalr);
+
+assign idex_controlw.load = (idex_controlw.opcode == op_lui)||
+															(idex_controlw.opcode == op_load);
 
 forwarding_unit forward
 (
