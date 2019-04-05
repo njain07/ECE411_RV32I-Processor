@@ -25,7 +25,7 @@ ldr_str_test:
    # cache line boundary
    lw x2, %lo(X)(x8)
    lw x4, %lo(Z)(x8)
-   # nop
+   #nop
    sw x1, %lo(Z)(x8)
    sw x2, %lo(Y)(x8)
    sw x3, %lo(X)(x8)
@@ -40,9 +40,9 @@ ldr_str_test:
    # nop
    # nop
    # nop
-   add x3, x3, x3
-   add x3, x3, x3
-   add x3, x3, x3
+   # add x3, x3, x3
+   # add x3, x3, x3
+   # add x3, x3, x3
    beq x0, x0, fetch_stall_test
 
    # nop

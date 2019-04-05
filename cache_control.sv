@@ -33,7 +33,6 @@ module cache_control
 
 
 enum int unsigned {
-    idle,
     check,
     write_back,
     update,
@@ -58,8 +57,6 @@ begin : state_actions
     dirty_load = 2'b00;
 
     case(state)
-      idle: mem_resp = 0;
-
       check:
         if (hit) begin
           lru_load = 1;
@@ -119,11 +116,9 @@ always_comb
 begin : next_state_logic
     next_state = state;
     case(state)
-      idle: if (mem_read | mem_write) next_state = check;
-
       check: begin
         if (hit) begin
-          next_state = idle;
+          next_state = check;
         end else begin
           if (dirty_out[lru_out])
             next_state = write_back;
@@ -136,13 +131,13 @@ begin : next_state_logic
 
       update: begin
       if (mem_write)
-        next_state = idle;
+        next_state = check;
       else
         if (pmem_resp)
           next_state = update_read;
       end
 
-      update_read: next_state = idle;
+      update_read: next_state = check;
     endcase
 end
 

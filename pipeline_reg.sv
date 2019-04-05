@@ -28,7 +28,7 @@ always_ff @(posedge clk)
 begin
     if (load)
     begin
-        instr <= instr_in;
+        instr <= flush ? nop : instr_in;
         pc <= pc_in;
         pc_plus_4 <= pc_4_in;
     end
@@ -36,7 +36,7 @@ end
 
 always_comb
 begin
-    instr_out = flush ? nop : instr;
+    instr_out = instr;
     pc_out = pc;
     pc_4_out = pc_plus_4;
 end
@@ -63,9 +63,6 @@ module id_ex_reg
                         rs1out_in,
                         rs2out_in,
 
-  input logic [4:0]     rs1_in,
-                        rs2_in,
-
   input logic [2:0]     funct3_in,
   input logic [6:0]     funct7_in,
 
@@ -89,7 +86,6 @@ module id_ex_reg
 
 rv32i_control_word controlw;
 logic [2:0] funct3;
-logic [4:0] rs1, rs2;
 logic [6:0] funct7;
 logic [31:0] pc, pc_plus_4, i_imm;
 logic [31:0] s_imm, b_imm, u_imm, j_imm, rs1out, rs2out;
@@ -107,8 +103,6 @@ begin
     rs2out = 32'd0;
     funct3 = 3'd0;
     funct7 = 7'd0;
-    rs1 = 5'd0;
-    rs2 = 5'd0;
 end
 
 always_ff @(posedge clk)
@@ -127,8 +121,6 @@ begin
       funct3 <= funct3_in;
       funct7 <= funct7_in;
       controlw <= controlw_in & { {64{~flush}} };
-      rs1 <= rs1_in;
-      rs2 <= rs2_in;
     end
 end
 
@@ -146,8 +138,8 @@ begin
     funct3_out = funct3;
     funct7_out = funct7;
     controlw_out = controlw;
-    rs1_out = rs1;
-    rs2_out = rs2;
+    rs1_out = controlw.rs1;
+    rs2_out = controlw.rs2;
 end
 
 endmodule : id_ex_reg

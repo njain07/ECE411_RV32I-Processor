@@ -6,7 +6,7 @@ module array #(
 )
 (
     input clk,
-	 input read,
+	input read,
     input load,
     input [s_index-1:0] index,
     input [width-1:0] datain,
@@ -15,7 +15,7 @@ module array #(
 
 logic [width-1:0] data [num_sets-1:0] /* synthesis ramstyle = "logic" */;
 logic [width-1:0] _dataout;
-assign dataout = _dataout;
+assign dataout = data[index];
 
 /* Initialize array */
 initial
@@ -28,12 +28,8 @@ end
 
 always_ff @(posedge clk)
 begin
-	 if (read)
-        _dataout <= data[index];
-
     if(load)
         data[index] <= datain;
 end
 
 endmodule : array
-

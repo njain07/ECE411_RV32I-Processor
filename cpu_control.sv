@@ -6,6 +6,9 @@ module cpu_control
 	input logic [2:0] funct3,
 	input logic [6:0] funct7,
 	input logic [4:0] rd,
+	input logic [4:0] rs1_in,
+	input logic [4:0] rs2_in,
+
 
 	output rv32i_control_word cword
 );
@@ -30,12 +33,18 @@ begin
 	cword.branch = 0;
 	cword.cmpop = branch_funct3_t'(funct3);
 	cword.funct3 = funct3;
+	cword.rs1 = rs1_in;
+	cword.rs2 = rs2_in;
+	cword.forwardA = 0;
+	cword.forwardB = 0;
 
 	/* Assign control signals */
 	case(opcode)
 		op_lui : begin
 			cword.load_regfile = 1;
 			cword.memwbmux_sel = 2;
+			cword.rs1 = 0;
+			cword.rs2 = 0;
 		end
 
 		op_auipc : begin
@@ -43,6 +52,8 @@ begin
 			cword.alumux1_sel = 1;
 			cword.alumux2_sel = 1;
 			cword.aluop = alu_add;
+			cword.rs1 = 0;
+			cword.rs2 = 0;
 		end
 
 		op_jal : begin
@@ -52,6 +63,8 @@ begin
 			cword.alumux2_sel = 5;
 			cword.aluop = alu_add;
 			cword.jump = 1;
+			cword.rs1 = 0;
+			cword.rs2 = 0;
 		end
 
 
@@ -60,6 +73,8 @@ begin
 			cword.memwbmux_sel = 4;
 			cword.aluop = alu_add;
 			cword.jump = 1;
+			cword.rs2 = 0;
+			cword.forwardA = 1;
 
 		end
 
@@ -69,6 +84,8 @@ begin
 			cword.alumux2_sel = 2;
 			cword.aluop = alu_add;
 			cword.branch = 1;
+			cword.rs1 = 0;
+			cword.rs2 = 0;
 		end
 
 		op_load : begin
@@ -76,17 +93,22 @@ begin
 			cword.mem_read = 1;
 			cword.memwbmux_sel = 3;
 			cword.load_regfile = 1;
+			cword.rs2 = 0;
+			cword.forwardA = 1;
 		end
 
 		op_store : begin
 			cword.alumux2_sel = 3;
 			cword.aluop = alu_add;
 			cword.mem_write = 1;
+			cword.forwardA = 1;
 		end
 
 		op_imm : begin
 			cword.load_regfile = 1;
 			cword.aluop = alu_ops'(funct3);
+			cword.rs2 = 0;
+			cword.forwardA = 1;
 			case(arith_funct3)
 				slt : begin
 					cword.cmpop = blt;
@@ -114,6 +136,8 @@ begin
 			cword.load_regfile = 1;
 			cword.alumux2_sel = 4;
 			cword.aluop = alu_ops'(funct3);
+			cword.forwardA = 1;
+			cword.forwardB = 1;
 			case(arith_funct3)
 				add : begin
 					if(funct7[5])

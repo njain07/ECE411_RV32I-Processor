@@ -24,7 +24,7 @@ module cpu_datapath
 //Internal signals
 //IF
 logic [31:0] pc_plus4, pcmux_out, pc_out, pc_sync_out, pc_4_sync, instr_mdr_out, nop;
-logic pc_load;
+logic if_id_load;
 //IF_ID
 logic [31:0] ifid_instr, ifid_pc, ifid_pc_4, ifid_pc_sync, ifid_pc4_sync;
 //ID
@@ -44,7 +44,8 @@ logic [31:0] idex_rs1out, idex_rs2out, idex_pc, idex_pc_4;
 logic pcmuxsel, br_en;
 logic [31:0] cmpmux_out, alumux1_out, alumux2_out, alu_out;
 logic [31:0] mux_forwardA_out, mux_forwardB_out, mux_forwardRS2_out;
-logic [2:0] forwardA, forwardB, forwardRS2;
+logic [1:0] forwardA, forwardB, forwardRS2;
+logic stall_lw;
 //EX_MEM
 logic [31:0] exmem_aluout, exmem_rs2out, exmem_bren, exmem_u_imm, exmem_pc_4;
 logic load;
@@ -67,13 +68,17 @@ rv32i_control_word controlw, idex_controlw, exmem_controlw, memwb_controlw;
 // assign nop = 32'h00000013;
 assign pc_plus4 = pc_out + 4;
 assign address_a = pc_out;
+assign read_a = 1;
+assign nop = 32'h00000013;
 
-instr_read instr_read (.*);
 
+assign if_id_load = load & ~stall_lw;
 
 cpu_control ctrl
 (
 	.*,
+	.rs1_in(rs1),
+	.rs2_in(rs2),
 	.cword(controlw)
 );
 
@@ -88,7 +93,7 @@ mux2 pcmux
 pc_register pc
 (
     .clk,
-    .load, //needs to be changed
+    .load(if_id_load),
     .in(pcmux_out),
     .out(pc_out)
 );
@@ -96,7 +101,7 @@ pc_register pc
 if_id_reg ifid_sync
 (
 	.clk,
-	.load(resp_a), //to be changed for data hazards
+	.load(if_id_load),
 	.instr_in(rdata_a),
 	.pc_in(pc_out),
 	.pc_4_in(pc_plus4),
@@ -106,20 +111,11 @@ if_id_reg ifid_sync
 	.pc_4_out(pc_4_sync)
 );
 
-// mux2 nop_mux
-// (
-// 	.sel(~pc_load),
-// 	.a(rdata_a),
-// 	.b(nop),
-// 	.f(instr_out)
-// );
-
-
 
 if_id_reg if_id
 (
 	.clk,
-	.load, //to be changed for data hazards
+	.load(if_id_load), //to be changed for data hazards
 	.instr_in(instr_mdr_out),
 	.pc_in(pc_sync_out),
 	.pc_4_in(pc_4_sync),
@@ -137,8 +133,8 @@ ir IR
 (
    .*,
    .clk,
-   .load, //to be changed
-   .in(ifid_instr)
+   .load(if_id_load),
+   .in(pcmuxsel ? nop : ifid_instr)
 );
 
 regfile regfile
@@ -146,8 +142,8 @@ regfile regfile
     .clk,
     .load(memwb_controlw.load_regfile),
     .in(memwbmux_out),
-    .src_a(rs1),
-    .src_b(rs2),
+    .src_a(idex_controlw.rs1),
+    .src_b(idex_controlw.rs2),
     .dest(memwb_controlw.rd),
     .reg_a(rs1_out),
     .reg_b(rs2_out)
@@ -156,7 +152,7 @@ regfile regfile
 register id_pc_sync
 (
 	.clk,
-	.load,
+	.load(if_id_load),
 	.in(ifid_pc),
 	.out(ifid_pc_sync)
 );
@@ -164,10 +160,20 @@ register id_pc_sync
 register id_pc4_sync
 (
 	.clk,
-	.load,
+	.load(if_id_load),
 	.in(ifid_pc_4),
 	.out(ifid_pc4_sync)
 );
+
+forwarding_unit lw_hazard_stall
+(
+	.*,
+	.rs1(controlw.rs1),
+	.rs2(controlw.rs2),
+	.forwardA(),
+	.forwardB()
+);
+
 
 id_ex_reg id_ex
 (
@@ -184,11 +190,9 @@ id_ex_reg id_ex
 	.j_imm_in(j_imm),
 	.rs1out_in(rs1_out),
 	.rs2out_in(rs2_out),
-	.rs1_in(rs1),
-	.rs2_in(rs2),
 	.funct3_in(funct3),
 	.funct7_in(funct7),
-	.flush(pcmuxsel),
+	.flush(pcmuxsel | stall_lw),
 	.pc_out (idex_pc),
 	.pc_4_out(idex_pc_4),
 	.i_imm_out(idex_i_imm),
@@ -217,15 +221,14 @@ forwarding_unit forward
 	.*,
 	.rs1(idex_rs1),
 	.rs2(idex_rs2),
-	.alumux1_sel(idex_controlw.alumux1_sel),
-	.alumux2_sel(idex_controlw.alumux2_sel)
+	.stall_lw()
 );
 
 
 mux2 cmpmux
 (
     .sel(idex_controlw.cmpmux_sel),
-    .a(idex_rs2out),
+    .a(rs2_out),
     .b(idex_i_imm),
     .f(cmpmux_out)
 );
@@ -233,7 +236,7 @@ mux2 cmpmux
 cmp cmp
 (
     .cmpop(idex_controlw.cmpop),
-    .a(idex_rs1out),
+    .a(rs1_out),
     .b(cmpmux_out),
     .f(br_en)
 );
@@ -249,7 +252,7 @@ alu alu
 mux2 alumux1
 (
     .sel(idex_controlw.alumux1_sel),
-    .a(idex_rs1out),
+    .a(rs1_out),
     .b(idex_pc),
     .f(alumux1_out)
 );
@@ -261,7 +264,7 @@ mux8 alumux2
     .b(idex_u_imm),
     .c(idex_b_imm),
     .d(idex_s_imm),
-    .e(idex_rs2out),
+    .e(rs2_out),
     .f(idex_j_imm),
     .g(),
     .h(),
@@ -269,46 +272,34 @@ mux8 alumux2
 );
 
 
-mux8 mux_forwardA
+mux4 mux_forwardA
 (
-	.sel(forwardA),
+	.sel({forwardA[1] & idex_controlw.forwardA, forwardA[0]}),
 	.a(alumux1_out),
 	.b(alumux1_out),
 	.c(exmem_aluout),
 	.d(memwb_aluout),
-	.e(alumux1_out),
-	.f(alumux1_out),
-	.g(final_rdata_b),
-	.h(memwb_rdata),
-	.q(mux_forwardA_out)
+	.f(mux_forwardA_out)
 );
 
-mux8 mux_forwardB
+mux4 mux_forwardB
 (
-	.sel(forwardB),
+	.sel({forwardB[1] & idex_controlw.forwardB, forwardB[0]}),
 	.a(alumux2_out),
 	.b(alumux2_out),
 	.c(exmem_aluout),
 	.d(memwb_aluout),
-	.e(alumux2_out),
-	.f(alumux2_out),
-	.g(final_rdata_b),
-	.h(memwb_rdata),
-	.q(mux_forwardB_out)
+	.f(mux_forwardB_out)
 );
 
-mux8 mux_forwardRS2
+mux4 mux_forwardRS2
 (
-	.sel(forwardRS2),
-	.a(idex_rs2out),
-	.b(idex_rs2out),
+	.sel(forwardB),
+	.a(rs2_out),
+	.b(rs2_out),
 	.c(exmem_aluout),
 	.d(memwb_aluout),
-	.e(idex_rs2out),
-	.f(idex_rs2out),
-	.g(final_rdata_b),
-	.h(memwb_rdata),
-	.q(mux_forwardRS2_out)
+	.f(mux_forwardRS2_out)
 );
 
 ex_mem_reg ex_mem
@@ -398,13 +389,6 @@ endmodule
 
 /*
  * TODO:
- * 1. Make test case for l2 cache. Use mp2-cp2
- * 2. Stall on lw
+ * 1. CP3 test
+ * 2. Test L2 cache more
  */
-
- /*
-  *1. Don't forward rdata, bad pipeline design. Instead check in decode stage using the forwarding_unit
-  * unit provided in lecture.
-  *2. Use the fwding unit from lecture multiple times instead of one big forwarding unit.
-  *3. Cache needs to respond in the same cycle. squash tag_check and idle, and combinationally return dataout.
-  */
