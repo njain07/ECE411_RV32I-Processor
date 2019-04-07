@@ -11,45 +11,45 @@ _start:
     # Note that one/two/eight are data labels
 
     la x1, line1
-	#nop
-	#nop
-	#nop
+
+
+
     la x2, line2
-	#nop
-	#nop
-	#nop
+
+
+
     la x3, line3
-    #nop
-    #nop
-	#nop
+
+
+
     lw x4, 0(x1)
-	#nop
-	#nop
-	#nop
+
+
+
     lw x5, 0(x2)
-	#nop
-	#nop
-	#nop
+
+
+
     lw x6, 0(x1)
-	#nop
-	#nop
-	#nop
+
+
+
     lw x7, 0(x3)
-	#nop
-	#nop
-	#nop
+
+
+
     lw x8, 0(x1)
-	#nop
-	#nop
-	#nop
+
+
+
     lw x1, 0(x3)
-	#nop
-	#nop
-	#nop
+
+
+
     lw x2, 0(x2)
-	#nop
-	#nop
-	#nop
+
+
+
 
 inf:
     jal x0, inf
