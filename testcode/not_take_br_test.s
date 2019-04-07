@@ -5,11 +5,12 @@
 _start:
 
 add x1, x0, x0
-addi x1,x1,1
+addi x1,x1,2
 
 add x2, x0, x0
-addi x2,x2,3
+addi x2,x2,2
 
+bne x2,x3,bad
 
 good:
   lw x7, GOOD
