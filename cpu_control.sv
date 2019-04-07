@@ -43,7 +43,6 @@ begin
 		op_lui : begin
 			cword.load_regfile = 1;
 			cword.memwbmux_sel = 2;
-			cword.rs1 = 0;
 			cword.rs2 = 0;
 		end
 
@@ -84,8 +83,6 @@ begin
 			cword.alumux2_sel = 2;
 			cword.aluop = alu_add;
 			cword.branch = 1;
-			cword.rs1 = 0;
-			cword.rs2 = 0;
 		end
 
 		op_load : begin

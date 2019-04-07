@@ -11,6 +11,7 @@ module mem_stall
 
 logic load_a, load_b;
 always_comb begin
+    load_a = 1;
     load_b = 1;
     if (read_b || write)
         load_b = resp_b;

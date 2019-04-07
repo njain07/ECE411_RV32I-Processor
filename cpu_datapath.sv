@@ -43,7 +43,7 @@ logic [31:0] idex_rs1out, idex_rs2out, idex_pc, idex_pc_4;
 //EX
 logic pcmuxsel, br_en;
 logic [31:0] cmpmux_out, alumux1_out, alumux2_out, alu_out;
-logic [31:0] mux_forwardA_out, mux_forwardB_out, mux_forwardRS2_out;
+logic [31:0] mux_forwardA_out, mux_forwardB_out, mux_forwardRS1_out, mux_forwardRS2_out;
 logic [1:0] forwardA, forwardB, forwardRS2;
 logic stall_lw;
 //EX_MEM
@@ -228,7 +228,7 @@ forwarding_unit forward
 mux2 cmpmux
 (
     .sel(idex_controlw.cmpmux_sel),
-    .a(rs2_out),
+    .a(mux_forwardRS2_out),
     .b(idex_i_imm),
     .f(cmpmux_out)
 );
@@ -236,7 +236,7 @@ mux2 cmpmux
 cmp cmp
 (
     .cmpop(idex_controlw.cmpop),
-    .a(rs1_out),
+    .a(mux_forwardRS1_out),
     .b(cmpmux_out),
     .f(br_en)
 );
@@ -291,6 +291,17 @@ mux4 mux_forwardB
 	.d(memwb_aluout),
 	.f(mux_forwardB_out)
 );
+
+mux4 mux_forwardRS1
+(
+	.sel(forwardA),
+	.a(rs1_out),
+	.b(rs1_out),
+	.c(exmem_aluout),
+	.d(memwb_aluout),
+	.f(mux_forwardRS1_out)
+);
+
 
 mux4 mux_forwardRS2
 (

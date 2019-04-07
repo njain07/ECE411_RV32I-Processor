@@ -5,8 +5,6 @@ module forwarding_unit
     input rv32i_control_word    idex_controlw,
                                 exmem_controlw,
                                 memwb_controlw,
-    input logic [31:0]          exmem_aluout,
-    input logic [31:0]          memwb_aluout,
 
     input logic [4:0]           rs1,
                                 rs2,
@@ -22,11 +20,11 @@ logic ex_forwardA, ex_forwardB;
 always_comb
 begin
     ex_forwardA = idex_controlw.load_regfile & (|rs1) &
-                    (|exmem_controlw.rd) &
-                    (exmem_controlw.rd == rs1);
-    ex_forwardB = exmem_controlw.load_regfile & (|rs2) &
-                    (|exmem_controlw.rd) &
-                    (exmem_controlw.rd == rs2);
+                    (|idex_controlw.rd) &
+                    (idex_controlw.rd == rs1);
+    ex_forwardB = idex_controlw.load_regfile & (|rs2) &
+                    (|idex_controlw.rd) &
+                    (idex_controlw.rd == rs2);
 
     mem_forwardA = exmem_controlw.load_regfile & (|rs1) &
                     (|exmem_controlw.rd) &

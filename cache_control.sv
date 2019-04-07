@@ -117,13 +117,17 @@ begin : next_state_logic
     next_state = state;
     case(state)
       check: begin
-        if (hit) begin
-          next_state = check;
-        end else begin
-          if (dirty_out[lru_out])
-            next_state = write_back;
-          else
-            next_state = update;
+        if (~mem_read & ~mem_write)
+            next_state = check;
+        else begin
+            if (hit) begin
+              next_state = check;
+            end else begin
+              if (dirty_out[lru_out])
+                next_state = write_back;
+              else
+                next_state = update;
+            end
         end
       end
 
