@@ -18,9 +18,8 @@ module data_cache
     output logic [31:0]   pmem_addr_b
 );
 
-logic array_read, array1_load, array2_load, pmdr_load, lru_load;
-logic [1:0] dirty_load, dirty_out;
-logic hit, way, lru_out;
+logic array_read, array_load, pmdr_load, lru_load, dirty_load, eviction;
+logic hit;
 logic datareadmux_sel, datawritemux_sel, adaptermux_sel, pmemaddrmux_sel;
 
 cache_datapath data_datapath

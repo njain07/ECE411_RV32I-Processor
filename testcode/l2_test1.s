@@ -11,45 +11,24 @@ _start:
     # Note that one/two/eight are data labels
 
     la x1, line1
-
-
-
     la x2, line2
-
-
-
     la x3, line3
-
-
-
-    lw x4, 0(x1)
-
-
-
-    lw x5, 0(x2)
-
-
-
+    la x4, line4
+    la x5, line5
     lw x6, 0(x1)
-
-
-
-    lw x7, 0(x3)
-
-
-
-    lw x8, 0(x1)
-
-
-
-    lw x1, 0(x3)
-
-
-
-    lw x2, 0(x2)
-
-
-
+    lw x7, 0(x2)
+    lw x8, 0(x3)
+    lw x9, 0(x4)
+    lw x10, 0(x1)
+    sw x7, 0(x1)
+    lw x11, 0(x2)
+    lw x12, 0(x3)
+    lw x13, 0(x4)
+    lw x14, 0(x5)
+    lw x15, 0(x1)
+    lw x16, 0(x2)
+    lw x17, 0(x3)
+    lw x18, 0(x4)
 
 inf:
     jal x0, inf
@@ -110,3 +89,39 @@ line3c:	    .word 0x00000000
 line3d:	    .word 0x00000000
 line3e:	    .word 0x00000000
 line3f:	    .word 0x00000000
+.balign 256
+.zero 96
+line4:	    .word 0x44444444
+line41:	    .word 0x00000000
+line42:	    .word 0x00000000
+line43:	    .word 0x00000000
+line44:	    .word 0x00000000
+line45:	    .word 0x00000000
+line46:	    .word 0x00000000
+line47:	    .word 0x00000000
+line48:	    .word 0x00000000
+line49:	    .word 0x00000000
+line4a:	    .word 0x00000000
+line4b:	    .word 0x00000000
+line4c:	    .word 0x00000000
+line4d:	    .word 0x00000000
+line4e:	    .word 0x00000000
+line4f:	    .word 0x00000000
+.balign 256
+.zero 96
+line5:	    .word 0x55555555
+line51:	    .word 0x00000000
+line52:	    .word 0x00000000
+line53:	    .word 0x00000000
+line54:	    .word 0x00000000
+line55:	    .word 0x00000000
+line56:	    .word 0x00000000
+line57:	    .word 0x00000000
+line58:	    .word 0x00000000
+line59:	    .word 0x00000000
+line5a:	    .word 0x00000000
+line5b:	    .word 0x00000000
+line5c:	    .word 0x00000000
+line5d:	    .word 0x00000000
+line5e:	    .word 0x00000000
+line5f:	    .word 0x00000000

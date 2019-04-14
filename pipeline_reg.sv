@@ -103,6 +103,7 @@ begin
     rs2out = 32'd0;
     funct3 = 3'd0;
     funct7 = 7'd0;
+    controlw = 64'd0;
 end
 
 always_ff @(posedge clk)
@@ -176,6 +177,7 @@ begin
     bren = 32'b0;
     u_imm = 32'b0;
     pc_plus_4 = 32'b0;
+    controlw = 64'd0;
 end
 
 always_ff @(posedge clk)
@@ -234,6 +236,7 @@ begin
     dmemout = 32'b0;
     u_imm = 32'b0;
     pc_plus_4 = 32'b0;
+    controlw = 64'd0;
 end
 
 // assign pcmuxsel = (controlw.opcode == op_jal) || (controlw.opcode == op_jalr) || (controlw.opcode == op_br && (bren[0]));

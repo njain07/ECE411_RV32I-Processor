@@ -12,20 +12,16 @@ module cache_l2_datapath #(
 
     //Datapath-control signals
     input logic           array_read,
-                          array1_load,
-                          array2_load,
+                          array_load,
                           lru_load,
                           pmdr_load,
-                          datareadmux_sel,
                           datawritemux_sel,
                           adaptermux_sel,
                           pmemaddrmux_sel,
-    input logic [1:0]     dirty_load,
+    input logic           dirty_load,
 
     output logic          hit,
-                          way,
-                          lru_out,
-    output logic [1:0]    dirty_out,
+                          eviction,
     //Cache-CPU signals
     input logic           mem_write,
                           mem_read,
@@ -43,7 +39,9 @@ logic[s_tag-1:0] tag_addr;
 logic[s_index-1:0] set;
 logic[s_offset-1:0] offset;
 
-logic valid1_out, valid2_out;
+logic valid1_out, valid2_out, way, lru_out, tag1_hit, tag2_hit, datareadmux_sel;
+logic array1_load, array2_load;
+logic [1:0] set_dirty, dirty_out;
 logic [s_tag-1:0] tag1_out, tag2_out, tag_lru;
 logic [s_line-1:0] data1_out, data2_out, wdata, wdata256;
 logic [s_line-1:0] rdata, rdata256, pmdr_out;
@@ -78,7 +76,7 @@ array #(.s_index(s_index)) lru
   .read(array_read),
   .load(lru_load),
   .index(set),
-  .datain(~way),
+  .datain((hit & ~way) | (~hit & ~lru_out)),
   .dataout(lru_out)
 );
 
@@ -90,7 +88,7 @@ array #(.s_index(s_index)) dirty[1:0]
 (
     clk,
     array_read,
-    dirty_load,
+    set_dirty,
     set,
     mem_write,
     dirty_out
@@ -124,6 +122,17 @@ assign tag2_hit = valid2_out & (tag2_out == tag_addr);
 
 assign hit = tag1_hit | tag2_hit;
 assign way = tag1_hit ? 0 : 1;
+
+assign array1_load = array_load & ((mem_write & (hit & ~way) | (~hit & ~lru_out)) |
+                                  (mem_read & ~lru_out));
+
+assign array2_load = array_load & ((mem_write & (hit & way) | (~hit & lru_out)) |
+                                (mem_read & lru_out));
+
+assign datareadmux_sel = hit ? way : lru_out;
+assign set_dirty[0] = dirty_load & ((hit & ~way) | (~hit & ~lru_out));
+assign set_dirty[1] = dirty_load & ((hit & way) | (~hit & lru_out));
+assign eviction = dirty_out[lru_out];
 
 /*
  * Physical memory

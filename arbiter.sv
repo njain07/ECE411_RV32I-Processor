@@ -32,7 +32,6 @@ begin
 	pmem_resp_b = 0;
 	mem_read = 0;
 	mem_write = 0;
-	mem_wdata = 0;
 	mem_address = 0;
 	if (pmem_read_a) begin
 		pmem_resp_a = mem_resp;
