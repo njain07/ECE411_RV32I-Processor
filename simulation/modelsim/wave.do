@@ -403,23 +403,6 @@ add wave -noupdate -group {regfile
 add wave -noupdate -group {regfile
 } /mp3_tb/dut/datapath/regfile/reg_b
 add wave -noupdate /mp3_tb/dut/datapath/regfile/data
-add wave -noupdate -group arbiter /mp3_tb/dut/cache/arbiter/clk
-add wave -noupdate -group arbiter /mp3_tb/dut/cache/arbiter/pmem_read_a
-add wave -noupdate -group arbiter /mp3_tb/dut/cache/arbiter/pmem_addr_a
-add wave -noupdate -group arbiter /mp3_tb/dut/cache/arbiter/pmem_resp_a
-add wave -noupdate -group arbiter /mp3_tb/dut/cache/arbiter/pmem_rdata_a
-add wave -noupdate -group arbiter /mp3_tb/dut/cache/arbiter/pmem_read_b
-add wave -noupdate -group arbiter /mp3_tb/dut/cache/arbiter/pmem_write_b
-add wave -noupdate -group arbiter /mp3_tb/dut/cache/arbiter/pmem_addr_b
-add wave -noupdate -group arbiter /mp3_tb/dut/cache/arbiter/pmem_resp_b
-add wave -noupdate -group arbiter /mp3_tb/dut/cache/arbiter/pmem_rdata_b
-add wave -noupdate -group arbiter /mp3_tb/dut/cache/arbiter/pmem_wdata_b
-add wave -noupdate -group arbiter /mp3_tb/dut/cache/arbiter/mem_resp
-add wave -noupdate -group arbiter /mp3_tb/dut/cache/arbiter/mem_read
-add wave -noupdate -group arbiter /mp3_tb/dut/cache/arbiter/mem_write
-add wave -noupdate -group arbiter /mp3_tb/dut/cache/arbiter/mem_rdata
-add wave -noupdate -group arbiter /mp3_tb/dut/cache/arbiter/mem_wdata
-add wave -noupdate -group arbiter /mp3_tb/dut/cache/arbiter/mem_address
 add wave -noupdate -group {fwd
 } /mp3_tb/dut/datapath/forward/idex_controlw
 add wave -noupdate -group {fwd
@@ -448,7 +431,6 @@ add wave -noupdate -group {fwd
 } /mp3_tb/dut/datapath/forward/ex_forwardA
 add wave -noupdate -group {fwd
 } /mp3_tb/dut/datapath/forward/ex_forwardB
-add wave -noupdate /mp3_tb/dut/datapath/regfile/data
 add wave -noupdate -group {cmpmux
 } /mp3_tb/dut/datapath/cmpmux/sel
 add wave -noupdate -group {cmpmux
@@ -493,13 +475,33 @@ add wave -noupdate -group {fwd_lw
 } /mp3_tb/dut/datapath/lw_hazard_stall/ex_forwardA
 add wave -noupdate -group {fwd_lw
 } /mp3_tb/dut/datapath/lw_hazard_stall/ex_forwardB
-add wave -noupdate /mp3_tb/dut/cache/data_cache/data_control/array1_load
-add wave -noupdate /mp3_tb/dut/cache/data_cache/data_control/array2_load
-add wave -noupdate /mp3_tb/dut/cache/data_cache/data_datapath/way
-add wave -noupdate /mp3_tb/dut/cache/data_cache/data_datapath/lru_out
-add wave -noupdate /mp3_tb/dut/cache/data_cache/data_datapath/lru_load
+add wave -noupdate -expand -group {arbiter} /mp3_tb/dut/cache/arbiter/clk
+add wave -noupdate -expand -group {arbiter} /mp3_tb/dut/cache/arbiter/pmem_read_a
+add wave -noupdate -expand -group {arbiter} /mp3_tb/dut/cache/arbiter/pmem_addr_a
+add wave -noupdate -expand -group {arbiter} /mp3_tb/dut/cache/arbiter/pmem_resp_a
+add wave -noupdate -expand -group {arbiter} /mp3_tb/dut/cache/arbiter/pmem_rdata_a
+add wave -noupdate -expand -group {arbiter} /mp3_tb/dut/cache/arbiter/pmem_read_b
+add wave -noupdate -expand -group {arbiter} /mp3_tb/dut/cache/arbiter/pmem_write_b
+add wave -noupdate -expand -group {arbiter} /mp3_tb/dut/cache/arbiter/pmem_addr_b
+add wave -noupdate -expand -group {arbiter} /mp3_tb/dut/cache/arbiter/pmem_resp_b
+add wave -noupdate -expand -group {arbiter} /mp3_tb/dut/cache/arbiter/pmem_rdata_b
+add wave -noupdate -expand -group {arbiter} /mp3_tb/dut/cache/arbiter/pmem_wdata_b
+add wave -noupdate -expand -group {arbiter} /mp3_tb/dut/cache/arbiter/mem_resp
+add wave -noupdate -expand -group {arbiter} /mp3_tb/dut/cache/arbiter/mem_read
+add wave -noupdate -expand -group {arbiter} /mp3_tb/dut/cache/arbiter/mem_write
+add wave -noupdate -expand -group {arbiter} /mp3_tb/dut/cache/arbiter/mem_rdata
+add wave -noupdate -expand -group {arbiter} /mp3_tb/dut/cache/arbiter/mem_wdata
+add wave -noupdate -expand -group {arbiter} /mp3_tb/dut/cache/arbiter/mem_address
+add wave -noupdate -expand -group {arbiter} /mp3_tb/dut/cache/arbiter/read_a
+add wave -noupdate -expand -group {arbiter} /mp3_tb/dut/cache/arbiter/read_b
+add wave -noupdate -expand -group {arbiter} /mp3_tb/dut/cache/arbiter/write_b
+add wave -noupdate -expand -group {arbiter} /mp3_tb/dut/cache/arbiter/resp
+add wave -noupdate -expand -group {arbiter} /mp3_tb/dut/cache/arbiter/addr_a
+add wave -noupdate -expand -group {arbiter} /mp3_tb/dut/cache/arbiter/addr_b
+add wave -noupdate -expand -group {arbiter} /mp3_tb/dut/cache/arbiter/wdata_b
+add wave -noupdate -expand -group {arbiter} /mp3_tb/dut/cache/arbiter/rdata
 TreeUpdate [SetDefaultTree]
-WaveRestoreCursors {{Cursor 1} {732611 ps} 0}
+WaveRestoreCursors {{Cursor 1} {9783413 ps} 0}
 quietly wave cursor active 1
 configure wave -namecolwidth 150
 configure wave -valuecolwidth 159
@@ -515,4 +517,4 @@ configure wave -griddelta 40
 configure wave -timeline 0
 configure wave -timelineunits ns
 update
-WaveRestoreZoom {553745 ps} {881873 ps}
+WaveRestoreZoom {9688279 ps} {10016407 ps}

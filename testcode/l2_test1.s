@@ -15,16 +15,16 @@ _start:
     la x3, line3
     la x4, line4
     la x5, line5
-    lw x6, 0(x1)
-    lw x7, 0(x2)
-    lw x8, 0(x3)
-    lw x9, 0(x4)
-    lw x10, 0(x1)
-    sw x7, 0(x1)
-    lw x11, 0(x2)
-    lw x12, 0(x3)
-    lw x13, 0(x4)
-    lw x14, 0(x5)
+    lw x6, 0(x1) #miss
+    lw x7, 0(x2) #miss
+    lw x8, 0(x3) #miss, evict x1 to l2
+    lw x9, 0(x4) #miss, evict x2 to l2
+    lw x10, 0(x1) #l2 hit, evict x3 to l2
+    sw x7, 0(x1) #hit, overwrite x1 with 22222222,
+    lw x11, 0(x2) #l2 hit, evict x4
+    lw x12, 0(x3) #l2 hit, evict x1, dirty write back
+    lw x13, 0(x4) #l2 hit, evict x2
+    lw x14, 0(x5) #miss, evict x3
     lw x15, 0(x1)
     lw x16, 0(x2)
     lw x17, 0(x3)
