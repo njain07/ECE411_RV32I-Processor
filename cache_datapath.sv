@@ -187,7 +187,7 @@ mux2 #(.width(256)) datawritemux
 
 mux2 dataloadmux
 (
-  .sel(mem_write),
+  .sel(hit & mem_write),
   .a(32'hffffffff),
   .b(data_load256),
   .f(data_load)

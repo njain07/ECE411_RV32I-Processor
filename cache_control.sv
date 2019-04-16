@@ -71,23 +71,16 @@ begin : state_actions
       end
 
       update: begin
-        dirty_load = 1;
-        if (mem_read) begin
           pmem_read = 1;
           pmdr_load = 1;
           pmemaddrmux_sel = 0;
-        end else begin
-          array_load = 1;
-          lru_load = 1;
-          mem_resp = 1;
-          datawritemux_sel = 1;
-        end
       end
 
       update_read: begin
+        dirty_load = 1;
         array_load = 1;
         lru_load = 1;
-        mem_resp = 1;
+        mem_resp = mem_read;
         datawritemux_sel = 0;
         adaptermux_sel = 1;
       end
@@ -116,13 +109,7 @@ begin : next_state_logic
 
       write_back: if (pmem_resp) next_state = update;
 
-      update: begin
-      if (mem_write)
-        next_state = check;
-      else
-        if (pmem_resp)
-          next_state = update_read;
-      end
+      update: if (pmem_resp) next_state = update_read;
 
       update_read: next_state = check;
     endcase
