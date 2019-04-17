@@ -9,6 +9,7 @@ module branch_predictor
   input logic [31:0] old_pc_value
   input logic [31:0] addr_value,
   input logic branch_taken,
+  input logic jump,
 
 
   output logic [31:0] pc_value,
@@ -57,51 +58,62 @@ always_comb
     input_pc = 0;
     new_pred = 0;
 
+    //Read
+
     btb_index = curr_pc_value[9:0];
     pc_value = output_pc;
 
-    bth_index = curr_pc_value[9:0];
+    bht_index = curr_pc_value[9:0];
     if (pred[1] == 1'b0)
       prediction = 0;
     else
       prediction =1;
 
 
-    bth_index = old_pc_value[9:0];
-    case(pred)
-        2'b00:begin
-          if(branch_taken)
-            new_pred = 2'b01;
-          else
-            new_pred = 2'b00;
-        end
+    // Write
 
-        2'b01:begin
-          if(branch_taken)
-            new_pred = 2'b10;
-          else
-            new_pred = 2'b00;
-        end
+    bht_index = old_pc_value[9:0];
 
-        2'b10:begin
-          if(branch_taken)
-            new_pred = 2'b11;
-          else
-            new_pred = 2'b01;
-        end
+    if(jump)
+      new_pred = 2'b11;
+    else
+    begin
+      case(pred)
+          2'b00:begin
+            if(branch_taken)
+              new_pred = 2'b01;
+            else
+              new_pred = 2'b00;
+          end
 
-        2'b11:begin
-          if(branch_taken)
-            new_pred = 2'b11;
-          else
-            new_pred = 2'b10;
-        end
+          2'b01:begin
+            if(branch_taken)
+              new_pred = 2'b10;
+            else
+              new_pred = 2'b00;
+          end
 
-      endcase
+          2'b10:begin
+            if(branch_taken)
+              new_pred = 2'b11;
+            else
+              new_pred = 2'b01;
+          end
+
+          2'b11:begin
+            if(branch_taken)
+              new_pred = 2'b11;
+            else
+              new_pred = 2'b10;
+          end
+
+        endcase
+    end
+    bht_load = 1'b1;
+
 
     if(addr_load)
       begin
-        bht_load = 1'b1;
         btb_index = old_pc_value[9:0];
         input_pc = addr_value;
         btb_load = 1'b1;
