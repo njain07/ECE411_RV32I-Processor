@@ -18,7 +18,8 @@ module cache_4way_datapath #(
                           datawritemux_sel,
                           adaptermux_sel,
                           pmemaddrmux_sel,
-    input logic           dirty_load,
+                          dirty_load,
+                          prefetch,
 
     output logic          hit,
                           eviction,
@@ -36,7 +37,7 @@ module cache_4way_datapath #(
 );
 
 logic comp0_select, comp1_select, array0_load, array1_load;
-logic lru0_load, lru1_load, dirty0_load, dirty1_load;
+logic lru0_load, lru1_load, dirty0_load, dirty1_load, lru_in;
 logic hit0, hit1, eviction0, eviction1, lru_out;
 logic [255:0] mem_rdata0, mem_rdata1;
 logic [255:0] pmem_wdata0, pmem_wdata1;
@@ -95,13 +96,14 @@ cache_l2_datapath component1
     .pmem_address(pmem_address1)
 );
 
+assign lru_in = hit ? hit0 : ~lru_out;
 array #(.s_index(s_index)) lru
 (
   .clk,
   .read(array_read),
-  .load(hit),
+  .load(lru_load),
   .index(set),
-  .datain(hit1),
+  .datain(lru_in),
   .dataout(lru_out)
 );
 

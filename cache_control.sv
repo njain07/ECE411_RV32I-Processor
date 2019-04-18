@@ -13,7 +13,7 @@ module cache_control
                           datawritemux_sel,
                           adaptermux_sel,
                           pmemaddrmux_sel,
-    output logic          dirty_load,
+                          dirty_load,
 
     //Control-CPU signals
     input logic           mem_write,
@@ -93,9 +93,9 @@ begin : next_state_logic
     next_state = state;
     case(state)
       check: begin
-        if (~mem_read & ~mem_write)
+        if (~mem_read & ~mem_write) begin
             next_state = check;
-        else begin
+        end else begin
             if (hit) begin
               next_state = check;
             end else begin
@@ -112,7 +112,7 @@ begin : next_state_logic
       update: if (pmem_resp) next_state = update_read;
 
       update_read: next_state = check;
-    endcase
+  endcase
 end
 
 always_ff @(posedge clk)

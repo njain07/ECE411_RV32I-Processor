@@ -18,7 +18,7 @@ module cache_datapath #(
                           datawritemux_sel,
                           adaptermux_sel,
                           pmemaddrmux_sel,
-    input logic           dirty_load,
+                          dirty_load,
 
     output logic          hit,
                           eviction,
@@ -41,28 +41,25 @@ logic[2:0] set;
 logic[4:0] offset;
 
 logic valid1_out, valid2_out, way, lru_out, tag1_hit, tag2_hit, datareadmux_sel;
-logic array1_load, array2_load;
+logic array1_load, array2_load, lru_in;
+logic way0_select, way1_select;
 logic [1:0] set_dirty, dirty_out;
 logic [23:0] tag1_out, tag2_out, tag_lru;
 logic [255:0] data1_out, data2_out, wdata, wdata256;
 logic [255:0] rdata, rdata256, pmdr_out;
 logic [31:0] data1_load, data2_load, data_load256, data_load;
+
+
 /*
  * Address decoder
  */
-decoder addr_decoder
-(
-  .in(mem_address),
-  .tag(tag_addr),
-  .set,
-  .offset
-);
+assign offset = mem_address[s_offset-1:0];
+assign set = mem_address[s_offset+s_index-1:s_offset];
+assign tag_addr = mem_address[31:s_offset+s_index];
 
 /*
  * Valid
  */
-
-
 array valid[1:0]
 (
     clk,
@@ -76,20 +73,21 @@ array valid[1:0]
 /*
  * LRU
  */
+
+assign lru_in = hit ? ~way : ~lru_out;
 array lru
 (
   .clk,
   .read(array_read),
   .load(lru_load),
   .index(set),
-  .datain((hit & ~way) | (~hit & ~lru_out)),
+  .datain(lru_in),
   .dataout(lru_out)
 );
 
 /*
  * Dirty
  */
-
 array dirty[1:0]
 (
     clk,
@@ -103,7 +101,6 @@ array dirty[1:0]
 /*
  * Tag
  */
-
 array #(.width(24)) tag[1:0]
 (
     clk,
@@ -129,21 +126,23 @@ assign tag2_hit = valid2_out & (tag2_out == tag_addr);
 assign hit = tag1_hit | tag2_hit;
 assign way = tag1_hit ? 0 : 1;
 
-assign array1_load = array_load & ((mem_write & (hit & ~way) | (~hit & ~lru_out)) |
-                                  (mem_read & ~lru_out));
+assign way0_select = hit ? ~way : ~lru_out;
+assign way1_select = hit ? way : lru_out;
 
-assign array2_load = array_load & ((mem_write & (hit & way) | (~hit & lru_out)) |
-                                (mem_read & lru_out));
+assign array1_load = array_load & ( (mem_write & way0_select) |
+                                    (mem_read & ~lru_out) );
+
+assign array2_load = array_load & ( (mem_write & way1_select) |
+                                    (mem_read & lru_out) );
 
 assign datareadmux_sel = hit ? way : lru_out;
-assign set_dirty[0] = dirty_load & ((hit & ~way) | (~hit & ~lru_out));
-assign set_dirty[1] = dirty_load & ((hit & way) | (~hit & lru_out));
+assign set_dirty[0] = dirty_load & way0_select;
+assign set_dirty[1] = dirty_load & way1_select;
 assign eviction = dirty_out[lru_out];
 
 /*
  * Physical memory
  */
-
 assign pmem_wdata = rdata;
 
 mux2 pmemaddr_mux
@@ -157,6 +156,9 @@ mux2 pmemaddr_mux
 /*
  * Data
 */
+
+assign data1_load = {32{array1_load}} & data_load;
+assign data2_load = {32{array2_load}} & data_load;
 
 data_array line[1:0]
 (
@@ -201,13 +203,10 @@ register #(.width(256)) pmdr
   .out(pmdr_out)
 );
 
-assign data1_load = {32{array1_load}} & data_load;
-assign data2_load = {32{array2_load}} & data_load;
 
 /*
  * Adapter
  */
-
 mux2 #(.width(256)) adaptermux
 (
   .sel(adaptermux_sel),
@@ -216,7 +215,6 @@ mux2 #(.width(256)) adaptermux
   .f(rdata256)
 );
 
-//MODULE PROBABLY NEEDS TO CHANGE FOR STORES
 bus_adapter adapter
 (
   .mem_wdata256(wdata256),
@@ -227,6 +225,7 @@ bus_adapter adapter
   .mem_byte_enable256(data_load256),
   .address(mem_address)
 );
+
 
 
 endmodule : cache_datapath

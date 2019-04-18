@@ -12,7 +12,8 @@ module cache_l2_control
                           datawritemux_sel,
                           adaptermux_sel,
                           pmemaddrmux_sel,
-    output logic          dirty_load,
+                          dirty_load,
+                          prefetch,
 
     //Control-CPU signals
     input logic           mem_write,
@@ -26,6 +27,13 @@ module cache_l2_control
                           pmem_read
 );
 
+logic get_more_stuff, mem_access;
+
+initial begin
+    get_more_stuff = 0;
+end
+
+assign mem_access = mem_read | mem_write;
 
 enum int unsigned {
     check,
@@ -50,11 +58,12 @@ begin : state_actions
     dirty_load = 0;
 
     case(state)
-      check:
-        if (mem_read | mem_write) begin
+      check: begin
+        prefetch = mem_access ? 0 : get_more_stuff;
+        if (mem_access | prefetch) begin
             if (hit) begin
                 lru_load = 1;
-                mem_resp = 1;
+                mem_resp = ~prefetch;
                 adaptermux_sel = 0;
                 if (mem_write) begin
                   array_load = 1;
@@ -63,6 +72,7 @@ begin : state_actions
                 end
             end
         end
+      end
 
       write_back: begin
         pmemaddrmux_sel = 1;
@@ -71,7 +81,7 @@ begin : state_actions
 
       update: begin
         dirty_load = 1;
-        if (mem_read) begin
+        if (mem_read | prefetch) begin
           pmem_read = 1;
           pmdr_load = 1;
           pmemaddrmux_sel = 0;
@@ -85,10 +95,12 @@ begin : state_actions
 
       update_read: begin
         array_load = 1;
-        lru_load = 1;
-        mem_resp = 1;
         datawritemux_sel = 0;
         adaptermux_sel = 1;
+        if (~prefetch) begin
+            lru_load = 1;
+            mem_resp = 1;
+        end
       end
 
     endcase
@@ -99,9 +111,7 @@ begin : next_state_logic
     next_state = state;
     case(state)
       check: begin
-        if (~mem_read & ~mem_write)
-            next_state = check;
-        else begin
+         if (mem_access | prefetch) begin
             if (hit) begin
               next_state = check;
             end else begin
@@ -110,13 +120,13 @@ begin : next_state_logic
               else
                 next_state = update;
             end
-        end
+         end
       end
 
       write_back: if (pmem_resp) next_state = update;
 
       update: begin
-      if (mem_write)
+      if (mem_write & ~prefetch)
         next_state = check;
       else
         if (pmem_resp)
@@ -130,6 +140,10 @@ end
 always_ff @(posedge clk)
 begin: next_state_assignment
     state <= next_state;
+    case (state)
+        check: if (~mem_access & hit) get_more_stuff <= 0;
+        update_read : get_more_stuff <= mem_access;
+    endcase
 end
 
 endmodule : cache_l2_control
