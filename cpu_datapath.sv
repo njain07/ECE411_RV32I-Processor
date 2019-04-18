@@ -86,7 +86,7 @@ mux2 pcmux
 (
     .sel(pcmuxsel),
     .a(pc_plus4),
-    .b(alu_out),
+    .b(pc_value_from_btb),
     .f(pcmux_out)
 );
 
@@ -174,6 +174,19 @@ forwarding_unit lw_hazard_stall
 	.forwardB()
 );
 
+// branch_predictor
+// (
+//   .clk,
+//   .btb_load,
+//   .pred_load,
+//   .br_pc_value,
+//   .pc_value_before_br,
+//   .pc_value_to_btb(ifid_pc),
+//   .br_en, ~
+//   .jump(controlw.jump),
+//   .pc_value_from_btb, ~
+//   .prediction() ~
+// );
 
 id_ex_reg id_ex
 (
@@ -212,8 +225,10 @@ id_ex_reg id_ex
  * Execute
  */
 
-assign pcmuxsel = (idex_controlw.jump) ||
-					(idex_controlw.branch & br_en);
+// assign pcmuxsel = (idex_controlw.jump) ||
+// 					(idex_controlw.branch & br_en);
+
+assign pcmuxsel = prediction;
 
 
 forwarding_unit forward
