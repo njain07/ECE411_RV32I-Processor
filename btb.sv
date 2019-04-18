@@ -3,7 +3,7 @@ import rv32i_types::*;
 module btb
 (
   input logic         clk,
-                      misprediction,
+                      load_btb,
   input logic [31:0]  target_addr,
   output logic [31:0] btb_out
 );
@@ -12,7 +12,7 @@ module btb
 logic btb_load;
 logic [9:0] rindex, windex;
 
-rw_array #(.s_index(10),.width(32)) btb_array
+rw_array #(.s_index(10), .width(32)) btb_array
 (
   .clk,
   .read(1),
@@ -29,10 +29,7 @@ always_comb begin
   rindex = pc_out[9:0];
   windex = idex_pc_value[9:0];
 
-  if(misprediction) begin
-    rindex = idex_pc_value[9:0];
-    btb_load = 1;
-  end
+  if(load_btb) btb_load = 1;
 end
 
 endmodule : btb

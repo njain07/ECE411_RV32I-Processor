@@ -10,8 +10,8 @@ module rw_array #(
 	input logic [s_index-1:0] rindex,
 					 									windex,
 														datain,
-	output logic [width-1:0] 	dataout,
-														initial_values
+	input logic [width-1:0]		initial_values,
+	output logic [width-1:0] 	dataout
 );
 
 localparam num_sets = 2**s_index;
@@ -25,7 +25,7 @@ initial
 begin
     for (int i = 0; i < num_sets; i++)
     begin
-        data[i] = 1'b0;
+        data[i] = initial_values;
     end
 end
 
