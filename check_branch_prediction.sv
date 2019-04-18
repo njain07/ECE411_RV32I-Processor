@@ -9,6 +9,8 @@ module check_branch_prediction
 
 always_comb begin
   misprediction = 1;
-  if(prediction == br_en) && (btb_out == alu_out)
+  if((prediction == br_en) && (btb_out == alu_out))
     misprediction = 0;
 end
+
+endmodule

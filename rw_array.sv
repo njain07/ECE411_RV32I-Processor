@@ -10,7 +10,7 @@ module rw_array #(
 	input logic [s_index-1:0] rindex,
 					 									windex,
 														datain,
-	input logic [width-1:0]		initial_values,
+	//input logic [width-1:0]		initial_values,
 	output logic [width-1:0] 	dataout
 );
 
@@ -25,7 +25,7 @@ initial
 begin
     for (int i = 0; i < num_sets; i++)
     begin
-        data[i] = initial_values;
+        data[i] = 1'b0;
     end
 end
 

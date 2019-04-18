@@ -23,7 +23,7 @@ module cpu_datapath
 
 //Internal signals
 //IF
-logic [31:0] pc_plus4, pcmux_out, pc_out, pc_sync_out, pc_4_sync, instr_mdr_out, nop;
+logic [31:0] pc_plus4, pcmux_out, pc_out, pc_sync_out, pc_4_sync, instr_mdr_out, nop, targ_addr;
 logic if_id_load;
 //IF_ID
 logic [31:0] ifid_instr, ifid_pc, ifid_pc_4, ifid_pc_sync, ifid_pc4_sync;
@@ -85,11 +85,19 @@ cpu_control ctrl
 	.cword(controlw)
 );
 
+mux2 #(.width(32)) pcmux_mux
+(
+	.sel(prediction),
+	.a(alu_out),
+	.b(btb_out),
+	.f(targ_addr)
+);
+
 mux2 pcmux
 (
     .sel(pcmuxsel),
     .a(pc_plus4),
-    .b(btb_out),
+    .b(targ_addr),
     .f(pcmux_out)
 );
 
@@ -182,6 +190,8 @@ btb btb
   .clk,
   .load_btb(misprediction),
   .target_addr(alu_out),
+  .pc_out,
+  .idex_pc_value(idex_pc),
   .btb_out
 );
 
@@ -218,7 +228,7 @@ id_ex_reg id_ex
 	.rs1out_in(rs1_out),
 	.rs2out_in(rs2_out),
 	.funct3_in(funct3),
-	.funct7_in(funct7),target_addr
+	.funct7_in(funct7),
 	.flush(misprediction | stall_lw),
 	.pc_out (idex_pc),
 	.pc_4_out(idex_pc_4),
