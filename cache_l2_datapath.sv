@@ -19,7 +19,6 @@ module cache_l2_datapath #(
                           adaptermux_sel,
                           pmemaddrmux_sel,
                           dirty_load,
-                          prefetch,
 
     output logic          hit,
                           eviction,
@@ -42,41 +41,21 @@ logic[s_offset-1:0] offset;
 
 logic valid1_out, valid2_out, way, lru_out, tag1_hit, tag2_hit, datareadmux_sel;
 logic array1_load, array2_load, mem_access, dirty_in, lru_in;
+logic way0_select, way1_select;
 logic [1:0] set_dirty, dirty_out;
 logic [s_tag-1:0] tag1_out, tag2_out, tag_lru;
 logic [s_line-1:0] data1_out, data2_out, wdata, wdata256;
 logic [s_line-1:0] rdata, rdata256, pmdr_out;
 logic [s_mask-1:0] data1_load, data2_load, data_load256, data_load;
-logic [31:0] addr, prefetch_addr;
 
 assign mem_access = mem_read | mem_write;
 
 /*
- * Hardware prefetch
- */
-register prefetch_mem_address
-(
-    .clk,
-    .load(mem_access & ~prefetch),
-    .in(mem_address),
-    .out(prefetch_addr)
-);
-
-mux2 addr_mux
-(
-    .sel(prefetch),
-    .a(mem_address),
-    .b(prefetch_addr + 32'h00000032),
-    .f(addr)
-);
-
-
-/*
  * Address decoder
  */
-assign offset = addr[s_offset-1:0];
-assign set = addr[s_offset+s_index-1:s_offset];
-assign tag_addr = addr[31:s_offset+s_index];
+assign offset = mem_address[s_offset-1:0];
+assign set = mem_address[s_offset+s_index-1:s_offset];
+assign tag_addr = mem_address[31:s_offset+s_index];
 
 /*
  * Valid
@@ -110,16 +89,13 @@ array #(.s_index(s_index)) lru
 /*
  * Dirty
  */
-
-assign dirty_in = prefetch ? 0 : mem_write;
-
 array #(.s_index(s_index)) dirty[1:0]
 (
     clk,
     array_read,
     set_dirty,
     set,
-    dirty_in,
+    mem_write,
     dirty_out
 );
 
@@ -175,7 +151,7 @@ assign pmem_wdata = rdata;
 mux2 pmemaddr_mux
 (
   .sel(pmemaddrmux_sel),
-  .a(addr),
+  .a(mem_address),
   .b({tag_lru, set, 5'd0}),
   .f(pmem_address)
 );

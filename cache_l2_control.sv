@@ -13,7 +13,6 @@ module cache_l2_control
                           adaptermux_sel,
                           pmemaddrmux_sel,
                           dirty_load,
-                          prefetch,
 
     //Control-CPU signals
     input logic           mem_write,
@@ -27,6 +26,7 @@ module cache_l2_control
                           pmem_read
 );
 
+<<<<<<< HEAD
 logic get_more_stuff, mem_access, prefetch_reg, check_prefetch;
 
 assign prefetch = prefetch_reg | check_prefetch;
@@ -37,6 +37,11 @@ initial begin
     prefetch_reg = 0;
 end
 
+=======
+logic mem_access;
+assign mem_access = mem_read | mem_write;
+
+>>>>>>> devel
 enum int unsigned {
     check,
     write_back,
@@ -62,11 +67,18 @@ begin : state_actions
 
     case(state)
       check: begin
+<<<<<<< HEAD
         check_prefetch = mem_access ? 0 : get_more_stuff;
         if (mem_access | check_prefetch) begin
             if (hit) begin
                 lru_load = 1;
                 mem_resp = ~check_prefetch;
+=======
+        if (mem_access) begin
+            if (hit) begin
+                lru_load = 1;
+                mem_resp = 1;
+>>>>>>> devel
                 adaptermux_sel = 0;
                 if (mem_write) begin
                   array_load = 1;
@@ -84,7 +96,11 @@ begin : state_actions
 
       update: begin
         dirty_load = 1;
+<<<<<<< HEAD
         if (mem_read | prefetch_reg) begin
+=======
+        if (mem_read) begin
+>>>>>>> devel
           pmem_read = 1;
           pmdr_load = 1;
           pmemaddrmux_sel = 0;
@@ -100,13 +116,19 @@ begin : state_actions
         array_load = 1;
         datawritemux_sel = 0;
         adaptermux_sel = 1;
+<<<<<<< HEAD
         if (~prefetch_reg) begin
             lru_load = 1;
             mem_resp = 1;
         end
+=======
+        lru_load = 1;
+        mem_resp = 1;
+>>>>>>> devel
       end
 
-    endcase
+      endcase
+
 end
 
 always_comb
@@ -114,7 +136,11 @@ begin : next_state_logic
     next_state = state;
     case(state)
       check: begin
+<<<<<<< HEAD
          if (mem_access | check_prefetch) begin
+=======
+         if (mem_access) begin
+>>>>>>> devel
             if (hit) begin
               next_state = check;
             end else begin
@@ -129,7 +155,11 @@ begin : next_state_logic
       write_back: if (pmem_resp) next_state = update;
 
       update: begin
+<<<<<<< HEAD
       if (mem_write & ~prefetch_reg)
+=======
+      if (mem_write)
+>>>>>>> devel
         next_state = check;
       else
         if (pmem_resp)
@@ -143,6 +173,7 @@ end
 always_ff @(posedge clk)
 begin: next_state_assignment
     state <= next_state;
+<<<<<<< HEAD
     case (state)
         check: begin
             prefetch_reg <= check_prefetch;
@@ -150,6 +181,8 @@ begin: next_state_assignment
         end
         update_read : get_more_stuff <= mem_access;
     endcase
+=======
+>>>>>>> devel
 end
 
 endmodule : cache_l2_control

@@ -41,6 +41,7 @@ data_cache data_cache (.*);
 l2_cache l2_cache (.*);
 cache_arbiter arbiter (.*);
 
+<<<<<<< HEAD
 // cache_stats stats
 // (
 //     .clk,
@@ -51,5 +52,17 @@ cache_arbiter arbiter (.*);
 //     .l2_access   (mem_read | mem_write),
 //     .l2_resp     (mem_resp)
 // );
+=======
+cache_stats stats
+(
+    .clk,
+    .instr_access(read_a),
+    .instr_resp(resp_a),
+    .data_access(read_b | write),
+    .data_resp(resp_b),
+    .l2_access(mem_read | mem_write),
+    .l2_resp(mem_resp)
+);
+>>>>>>> devel
 
 endmodule : cache
