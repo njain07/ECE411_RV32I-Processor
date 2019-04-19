@@ -8,7 +8,7 @@ module bht_array #(
 	 													load,
 	input logic [s_index-1:0] rindex,
 					 									windex,
-														datain,
+	input logic [width-1:0]		datain,
 	//input logic [width-1:0]		initial_values,
 	output logic [width-1:0] 	dataout
 );
@@ -60,7 +60,7 @@ logic [9:0] rindex, windex;
 bht_array bht_array
 (
   .clk,
-  .read(1),
+  .read(1'b1),
   .load(bht_load),
   .rindex(rindex),
 	.windex(windex),
