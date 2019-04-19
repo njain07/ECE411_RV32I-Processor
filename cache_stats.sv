@@ -18,7 +18,6 @@ initial begin
 	num_l2_access = 0;
 	instr_miss = 0;
 	data_miss = 0;
-	l1_miss = 0;
 	l2_miss = 0;
 end
 
@@ -26,7 +25,7 @@ assign num_l1_access = num_instr_access + num_data_access;
 assign l1_miss = instr_miss + data_miss;
 
 always_ff @ (posedge clk)
-begin 
+begin
 	if (instr_access)
 		if (instr_resp)
 			num_instr_access <= num_instr_access + 1;

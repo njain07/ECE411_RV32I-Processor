@@ -27,13 +27,15 @@ module cache_l2_control
                           pmem_read
 );
 
-logic get_more_stuff, mem_access;
+logic get_more_stuff, mem_access, prefetch_reg, check_prefetch;
+
+assign prefetch = prefetch_reg | check_prefetch;
+assign mem_access = mem_read | mem_write;
 
 initial begin
     get_more_stuff = 0;
+    prefetch_reg = 0;
 end
-
-assign mem_access = mem_read | mem_write;
 
 enum int unsigned {
     check,
@@ -56,14 +58,15 @@ begin : state_actions
     adaptermux_sel = 0;
     pmemaddrmux_sel = 0;
     dirty_load = 0;
+    check_prefetch = 0;
 
     case(state)
       check: begin
-        prefetch = mem_access ? 0 : get_more_stuff;
-        if (mem_access | prefetch) begin
+        check_prefetch = mem_access ? 0 : get_more_stuff;
+        if (mem_access | check_prefetch) begin
             if (hit) begin
                 lru_load = 1;
-                mem_resp = ~prefetch;
+                mem_resp = ~check_prefetch;
                 adaptermux_sel = 0;
                 if (mem_write) begin
                   array_load = 1;
@@ -81,7 +84,7 @@ begin : state_actions
 
       update: begin
         dirty_load = 1;
-        if (mem_read | prefetch) begin
+        if (mem_read | prefetch_reg) begin
           pmem_read = 1;
           pmdr_load = 1;
           pmemaddrmux_sel = 0;
@@ -97,7 +100,7 @@ begin : state_actions
         array_load = 1;
         datawritemux_sel = 0;
         adaptermux_sel = 1;
-        if (~prefetch) begin
+        if (~prefetch_reg) begin
             lru_load = 1;
             mem_resp = 1;
         end
@@ -111,7 +114,7 @@ begin : next_state_logic
     next_state = state;
     case(state)
       check: begin
-         if (mem_access | prefetch) begin
+         if (mem_access | check_prefetch) begin
             if (hit) begin
               next_state = check;
             end else begin
@@ -126,7 +129,7 @@ begin : next_state_logic
       write_back: if (pmem_resp) next_state = update;
 
       update: begin
-      if (mem_write & ~prefetch)
+      if (mem_write & ~prefetch_reg)
         next_state = check;
       else
         if (pmem_resp)
@@ -141,7 +144,10 @@ always_ff @(posedge clk)
 begin: next_state_assignment
     state <= next_state;
     case (state)
-        check: if (~mem_access & hit) get_more_stuff <= 0;
+        check: begin
+            prefetch_reg <= check_prefetch;
+            if (~mem_access & hit) get_more_stuff <= 0;
+        end
         update_read : get_more_stuff <= mem_access;
     endcase
 end
