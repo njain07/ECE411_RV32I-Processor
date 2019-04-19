@@ -50,7 +50,6 @@ begin : state_actions
     adaptermux_sel = 0;
     pmemaddrmux_sel = 0;
     dirty_load = 0;
-    check_prefetch = 0;
 
     case(state)
       check: begin
