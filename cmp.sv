@@ -12,10 +12,10 @@ begin
 	case (cmpop)
 		beq: f = a == b;
 		bne: f = a != b;
-		blt: f = a < b;
-		bge: f = a >= b;
-		bltu: f = $signed(a) < $signed(b);
-		bgeu: f = $signed(a) >= $signed(b);
+		bltu: f = a < b;
+		bgeu: f = a >= b;
+		blt: f = $signed(a) < $signed(b);
+		bge: f = $signed(a) >= $signed(b);
 	endcase
 end
 

@@ -27,11 +27,13 @@ rw_array #(.s_index(10), .width(32)) btb_array
 );
 
 always_comb begin
-  btb_load = 0;
   rindex = pc_out[9:0];
   windex = idex_pc_value[9:0];
+end
 
+always_ff @(posedge clk) begin
   if(load_btb) btb_load = 1;
+  else btb_load = 0;
 end
 
 endmodule : btb

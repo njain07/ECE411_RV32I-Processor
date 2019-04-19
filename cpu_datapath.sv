@@ -87,7 +87,7 @@ cpu_control ctrl
 
 mux2 #(.width(32)) pcmux_mux
 (
-	.sel(prediction),
+	.sel(prediction && ~misprediction),
 	.a(alu_out),
 	.b(btb_out),
 	.f(targ_addr)
@@ -95,7 +95,7 @@ mux2 #(.width(32)) pcmux_mux
 
 mux2 pcmux
 (
-    .sel(pcmuxsel),
+    .sel(pcmuxsel | misprediction),
     .a(pc_plus4),
     .b(targ_addr),
     .f(pcmux_out)
@@ -191,7 +191,7 @@ btb btb
   .load_btb(misprediction),
   .target_addr(alu_out),
   .pc_out,
-  .idex_pc_value(idex_pc),
+  .idex_pc_value(ifid_pc_sync), //idex_pc
   .btb_out
 );
 
@@ -209,7 +209,8 @@ check_branch_prediction check_branch_prediction
 (
 	.*,
 	.prediction(idex_prediction),
-	.btb_out(idex_btb_out)
+	.btb_out(idex_btb_out),
+	.opcode(idex_controlw.opcode)
 );
 
 id_ex_reg id_ex
