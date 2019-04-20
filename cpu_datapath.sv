@@ -23,7 +23,7 @@ module cpu_datapath
 
 //Internal signals
 //IF
-logic [31:0] pc_plus4, pcmux_out, pc_out, pc_sync_out, pc_4_sync, instr_mdr_out, nop;
+logic [31:0] pc_plus4, pcmux_out, pc_out, pc_sync_out, pc_4_sync, instr_mdr_out, nop, targ_addr;
 logic if_id_load;
 //IF_ID
 logic [31:0] ifid_instr, ifid_pc, ifid_pc_4, ifid_pc_sync, ifid_pc4_sync;
@@ -34,12 +34,16 @@ logic [6:0] funct7;
 logic [31:0] i_imm, s_imm, b_imm, u_imm, j_imm;
 logic [4:0] rs1, rs2, rd;
 logic [31:0] rs1_out, rs2_out;
+logic prediction, misprediction;
+logic [31:0] btb_out;
 //ID_EX
+logic idex_prediction;
 logic [2:0] idex_funct3;
 logic [4:0] idex_rs1, idex_rs2;
 logic [6:0] idex_funct7;
 logic [31:0] idex_i_imm, idex_s_imm, idex_b_imm, idex_u_imm, idex_j_imm;
 logic [31:0] idex_rs1out, idex_rs2out, idex_pc, idex_pc_4;
+logic [31:0] idex_btb_out;
 //EX
 logic pcmuxsel, br_en;
 logic [31:0] cmpmux_out, alumux1_out, alumux2_out, alu_out;
@@ -71,7 +75,6 @@ assign address_a = pc_out;
 assign read_a = 1;
 assign nop = 32'h00000013;
 
-
 assign if_id_load = load & ~stall_lw;
 
 cpu_control ctrl
@@ -82,11 +85,19 @@ cpu_control ctrl
 	.cword(controlw)
 );
 
+mux2 #(.width(32)) pcmux_mux
+(
+	.sel(prediction && ~misprediction),
+	.a(alu_out),
+	.b(btb_out),
+	.f(targ_addr)
+);
+
 mux2 pcmux
 (
-    .sel(pcmuxsel),
+    .sel(pcmuxsel | misprediction),
     .a(pc_plus4),
-    .b(alu_out),
+    .b(targ_addr),
     .f(pcmux_out)
 );
 
@@ -105,7 +116,7 @@ if_id_reg ifid_sync
 	.instr_in(rdata_a),
 	.pc_in(pc_out),
 	.pc_4_in(pc_plus4),
-	.flush(pcmuxsel),
+	.flush(misprediction),
 	.instr_out(instr_mdr_out),
 	.pc_out(pc_sync_out),
 	.pc_4_out(pc_4_sync)
@@ -119,7 +130,7 @@ if_id_reg if_id
 	.instr_in(instr_mdr_out),
 	.pc_in(pc_sync_out),
 	.pc_4_in(pc_4_sync),
-	.flush(pcmuxsel),
+	.flush(misprediction),
 	.instr_out(ifid_instr),
 	.pc_out(ifid_pc),
 	.pc_4_out(ifid_pc_4)
@@ -134,7 +145,7 @@ ir IR
    .*,
    .clk,
    .load(if_id_load),
-   .in(pcmuxsel ? nop : ifid_instr)
+   .in(misprediction ? nop : ifid_instr)
 );
 
 regfile regfile
@@ -174,6 +185,34 @@ forwarding_unit lw_hazard_stall
 	.forwardB()
 );
 
+btb btb
+(
+  .clk,
+  .load_btb(misprediction),
+  .target_addr(alu_out),
+  .pc_sync_out,
+  .idex_pc_value(idex_pc), //idex_pc
+  .btb_out
+);
+
+branch_predictor local_bht
+(
+  .clk,
+  .pc_out,
+  .idex_pc_value(idex_pc),
+  .br_en,
+  .jump(idex_controlw.jump),
+	.branch(idex_controlw.branch),
+	.prediction
+);
+
+check_branch_prediction check_branch_prediction
+(
+	.*,
+	.prediction(idex_prediction),
+	.btb_out(idex_btb_out),
+	.opcode(idex_controlw.opcode)
+);
 
 id_ex_reg id_ex
 (
@@ -192,7 +231,7 @@ id_ex_reg id_ex
 	.rs2out_in(rs2_out),
 	.funct3_in(funct3),
 	.funct7_in(funct7),
-	.flush(pcmuxsel | stall_lw),
+	.flush(misprediction | stall_lw),
 	.pc_out (idex_pc),
 	.pc_4_out(idex_pc_4),
 	.i_imm_out(idex_i_imm),
@@ -205,15 +244,21 @@ id_ex_reg id_ex
 	.rs1_out(idex_rs1),
 	.rs2_out(idex_rs2),
 	.funct3_out(idex_funct3),
-	.funct7_out(idex_funct7)
+	.funct7_out(idex_funct7),
+	.prediction_in(prediction),
+	.btb_out_in(btb_out),
+	.prediction_out(idex_prediction),
+	.btb_out_out(idex_btb_out)
 );
 
 /*
  * Execute
  */
 
-assign pcmuxsel = (idex_controlw.jump) ||
-					(idex_controlw.branch & br_en);
+// assign pcmuxsel = (idex_controlw.jump) ||
+// 					(idex_controlw.branch & br_en);
+
+assign pcmuxsel = prediction;
 
 
 forwarding_unit forward

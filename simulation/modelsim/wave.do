@@ -336,7 +336,7 @@ add wave -noupdate /mp3_tb/dut/cache/arbiter/lookahead_addr
 TreeUpdate [SetDefaultTree]
 WaveRestoreCursors {{Cursor 1} {945000 ps} 0}
 quietly wave cursor active 1
-configure wave -namecolwidth 150
+configure wave -namecolwidth 228
 configure wave -valuecolwidth 159
 configure wave -justifyvalue left
 configure wave -signalnamewidth 1

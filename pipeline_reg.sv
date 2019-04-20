@@ -49,6 +49,7 @@ module id_ex_reg
   input logic           clk,
                         load,
                         flush,
+                        prediction_in,
 
   input rv32i_control_word controlw_in,
   output rv32i_control_word controlw_out,
@@ -62,11 +63,12 @@ module id_ex_reg
                         j_imm_in,
                         rs1out_in,
                         rs2out_in,
+                        btb_out_in,
 
   input logic [2:0]     funct3_in,
   input logic [6:0]     funct7_in,
 
-
+  output logic          prediction_out,
   output logic [31:0]   pc_out,
                         pc_4_out,
                         i_imm_out,
@@ -76,6 +78,7 @@ module id_ex_reg
                         j_imm_out,
                         rs1out_out,
                         rs2out_out,
+                        btb_out_out,
 
   output logic [4:0]    rs1_out,
                         rs2_out,
@@ -85,10 +88,11 @@ module id_ex_reg
 );
 
 rv32i_control_word controlw;
+logic prediction;
 logic [2:0] funct3;
 logic [6:0] funct7;
 logic [31:0] pc, pc_plus_4, i_imm;
-logic [31:0] s_imm, b_imm, u_imm, j_imm, rs1out, rs2out;
+logic [31:0] s_imm, b_imm, u_imm, j_imm, rs1out, rs2out, btb_out;
 
 initial
 begin
@@ -104,6 +108,8 @@ begin
     funct3 = 3'd0;
     funct7 = 7'd0;
     controlw = 64'd0;
+    prediction = 1'd0;
+    btb_out = 32'd0;
 end
 
 always_ff @(posedge clk)
@@ -122,6 +128,8 @@ begin
       funct3 <= funct3_in;
       funct7 <= funct7_in;
       controlw <= controlw_in & { {64{~flush}} };
+      prediction <= prediction_in;
+      btb_out <= btb_out_in;
     end
 end
 
@@ -141,6 +149,8 @@ begin
     controlw_out = controlw;
     rs1_out = controlw.rs1;
     rs2_out = controlw.rs2;
+    prediction_out = prediction;
+    btb_out_out = btb_out;
 end
 
 endmodule : id_ex_reg

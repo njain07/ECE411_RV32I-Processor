@@ -176,7 +176,7 @@ LOOP:
     addi x4, x4, -1
     bgtz x4, LOOP
 
-HALT:  
+HALT:
     beq x0, x0, HALT
 
 .section .rodata
