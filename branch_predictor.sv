@@ -47,7 +47,8 @@ module branch_predictor
   input logic [31:0] pc_out,
   input logic [31:0] idex_pc_value,
   input logic br_en,
-  input logic jump,
+							jump,
+							branch,
 
   output logic prediction
 );
@@ -85,27 +86,29 @@ always_comb begin
   if(jump)
     new_pred = 2'b11;
   else begin
-    case(pred)
-      2'b00 : begin
-        if(br_en) new_pred = 2'b01;
-        else new_pred = 2'b00;
-      end
+		if(branch) begin
+	    case(pred)
+	      2'b00 : begin
+	        if(br_en) new_pred = 2'b01;
+	        else new_pred = 2'b00;
+	      end
 
-      2'b01 : begin
-        if(br_en) new_pred = 2'b10;
-        else new_pred = 2'b00;
-      end
+	      2'b01 : begin
+	        if(br_en) new_pred = 2'b10;
+	        else new_pred = 2'b00;
+	      end
 
-      2'b10 : begin
-        if(br_en) new_pred = 2'b11;
-        else new_pred = 2'b01;
-      end
+	      2'b10 : begin
+	        if(br_en) new_pred = 2'b11;
+	        else new_pred = 2'b01;
+	      end
 
-      2'b11 : begin
-        if(br_en) new_pred = 2'b11;
-        else new_pred = 2'b10;
-      end
-    endcase
+	      2'b11 : begin
+	        if(br_en) new_pred = 2'b11;
+	        else new_pred = 2'b10;
+	      end
+	    endcase
+		end
   end
   bht_load = 1'b1;
 end

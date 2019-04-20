@@ -190,8 +190,8 @@ btb btb
   .clk,
   .load_btb(misprediction),
   .target_addr(alu_out),
-  .pc_out,
-  .idex_pc_value(ifid_pc_sync), //idex_pc
+  .pc_sync_out,
+  .idex_pc_value(idex_pc), //idex_pc
   .btb_out
 );
 
@@ -202,6 +202,7 @@ branch_predictor local_bht
   .idex_pc_value(idex_pc),
   .br_en,
   .jump(idex_controlw.jump),
+	.branch(idex_controlw.branch),
 	.prediction
 );
 

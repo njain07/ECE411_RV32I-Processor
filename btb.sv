@@ -5,7 +5,7 @@ module btb
   input logic         clk,
                       load_btb,
   input logic [31:0]  target_addr,
-							 pc_out,
+							 pc_sync_out,
 							 idex_pc_value,
   output logic [31:0] btb_out
 );
@@ -18,7 +18,7 @@ rw_array #(.s_index(10), .width(32)) btb_array
 (
   .clk,
   .read(1'b1),
-  .load(btb_load),
+  .load(load_btb),
   .rindex(rindex),
 	.windex(windex),
   .datain(target_addr),
@@ -27,13 +27,13 @@ rw_array #(.s_index(10), .width(32)) btb_array
 );
 
 always_comb begin
-  rindex = pc_out[9:0];
+  rindex = pc_sync_out[9:0];
   windex = idex_pc_value[9:0];
 end
 
-always_ff @(posedge clk) begin
-  if(load_btb) btb_load = 1;
-  else btb_load = 0;
-end
+// always_ff @(posedge clk) begin
+//   if(load_btb) btb_load = 1;
+//   else btb_load = 0;
+// end
 
 endmodule : btb
