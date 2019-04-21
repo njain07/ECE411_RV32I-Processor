@@ -19,7 +19,6 @@ module cache_4way_datapath #(
                           adaptermux_sel,
                           pmemaddrmux_sel,
                           dirty_load,
-                          prefetch,
 
     output logic          hit,
                           eviction,

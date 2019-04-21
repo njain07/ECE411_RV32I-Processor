@@ -25,6 +25,7 @@ module cpu_datapath
 //IF
 logic [31:0] pc_plus4, pcmux_out, pc_out, pc_sync_out, pc_4_sync, instr_mdr_out, nop, targ_addr;
 logic if_id_load;
+logic [1:0] predmux_sel;
 //IF_ID
 logic [31:0] ifid_instr, ifid_pc, ifid_pc_4, ifid_pc_sync, ifid_pc4_sync;
 //ID
@@ -85,17 +86,20 @@ cpu_control ctrl
 	.cword(controlw)
 );
 
-mux2 #(.width(32)) pcmux_mux
+assign predmux_sel = {misprediction & ~br_en , prediction & ~misprediction};
+mux4 predmux
 (
-	.sel(prediction && ~misprediction),
+	.sel(predmux_sel),
 	.a(alu_out),
 	.b(btb_out),
+	.c(idex_pc_4),
+	.d(idex_pc_4),
 	.f(targ_addr)
 );
 
 mux2 pcmux
 (
-    .sel(pcmuxsel | misprediction),
+    .sel(prediction | misprediction),
     .a(pc_plus4),
     .b(targ_addr),
     .f(pcmux_out)
@@ -254,12 +258,6 @@ id_ex_reg id_ex
 /*
  * Execute
  */
-
-// assign pcmuxsel = (idex_controlw.jump) ||
-// 					(idex_controlw.branch & br_en);
-
-assign pcmuxsel = prediction;
-
 
 forwarding_unit forward
 (

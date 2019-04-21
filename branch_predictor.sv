@@ -3,21 +3,20 @@ module bht_array #(
 	parameter width = 2
 )
 (
-	input logic 							clk,
-	 													read,
-	 													load,
-	input logic [s_index-1:0] rindex,
-					 									windex,
+	input logic 				clk,
+	 							read,
+	 							load,
+	input logic [s_index-1:0] 	rindex,
+					 			windex,
 	input logic [width-1:0]		datain,
-	//input logic [width-1:0]		initial_values,
 	output logic [width-1:0] 	dataout
 );
 
 localparam num_sets = 2**s_index;
 
 logic [width-1:0] data [num_sets-1:0] /* synthesis ramstyle = "logic" */;
-logic [width-1:0] _dataout;
-assign dataout = _dataout;
+// logic [width-1:0] _dataout;
+assign dataout = data[rindex];
 
 /* Initialize array */
 initial
@@ -30,9 +29,6 @@ end
 
 always_ff @(posedge clk)
 begin
-    if (read)
-        _dataout <= (load  & (rindex == windex)) ? datain : data[rindex];
-
     if(load)
         data[windex] <= datain;
 end
@@ -67,7 +63,6 @@ bht_array bht_array
 	.windex(windex),
   .datain(new_pred),
   .dataout(pred)
-	//.initial_values(2'b01)	//weakly not taken
 );
 
 always_comb begin
@@ -76,17 +71,14 @@ always_comb begin
 
   // Read
   rindex = pc_out[9:0];
-  if (pred[1] == 1'b0)
-    prediction = 0;
-  else
-    prediction = 1;
+  prediction = pred[1];
 
   // Write
 	windex = idex_pc_value[9:0];
-  if(jump)
-    new_pred = 2'b11;
-  else begin
-		if(branch) begin
+  // if(jump)
+  //   new_pred = 2'b11;
+  // else begin
+	if(branch | jump) begin
 	    case(pred)
 	      2'b00 : begin
 	        if(br_en) new_pred = 2'b01;
@@ -108,8 +100,8 @@ always_comb begin
 	        else new_pred = 2'b10;
 	      end
 	    endcase
-		end
-  end
+	end
+  // end
   bht_load = 1'b1;
 end
 

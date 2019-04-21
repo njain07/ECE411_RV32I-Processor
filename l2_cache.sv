@@ -16,7 +16,7 @@ module l2_cache
     output logic [31:0]   pmem_address
 );
 
-logic array_read, array_load, pmdr_load, lru_load, dirty_load, eviction, prefetch;
+logic array_read, array_load, pmdr_load, lru_load, dirty_load, eviction;
 logic hit;
 logic datareadmux_sel, datawritemux_sel, adaptermux_sel, pmemaddrmux_sel;
 
