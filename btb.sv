@@ -5,7 +5,7 @@ module btb
   input logic           clk,
                         load_btb,
   input logic [31:0]    target_addr,
-                        pc_sync_out,
+                        pc_out,
                         idex_pc_value,
   output logic [31:0]   btb_out
 );
@@ -26,7 +26,7 @@ rw_array #(.s_index(10), .width(32)) btb_array
 );
 
 always_comb begin
-  rindex = pc_sync_out[9:0];
+  rindex = pc_out[9:0];
   windex = idex_pc_value[9:0];
 end
 

@@ -25,7 +25,7 @@ module cpu_datapath
 //IF
 logic [31:0] pc_plus4, pcmux_out, pc_out, pc_sync_out, pc_4_sync, instr_mdr_out, nop, targ_addr;
 logic if_id_load;
-logic [1:0] predmux_sel;
+logic [1:0] predmux_sel, pred_sync, ifid_pred, ifid_pred_sync, pred;
 //IF_ID
 logic [31:0] ifid_instr, ifid_pc, ifid_pc_4, ifid_pc_sync, ifid_pc4_sync;
 //ID
@@ -45,6 +45,7 @@ logic [6:0] idex_funct7;
 logic [31:0] idex_i_imm, idex_s_imm, idex_b_imm, idex_u_imm, idex_j_imm;
 logic [31:0] idex_rs1out, idex_rs2out, idex_pc, idex_pc_4;
 logic [31:0] idex_btb_out;
+logic [1:0] idex_pred_state;
 //EX
 logic pcmuxsel, br_en;
 logic [31:0] cmpmux_out, alumux1_out, alumux2_out, alu_out;
@@ -86,7 +87,9 @@ cpu_control ctrl
 	.cword(controlw)
 );
 
+assign prediction = pred[1];
 assign predmux_sel = {misprediction & ~br_en , prediction & ~misprediction};
+
 mux4 predmux
 (
 	.sel(predmux_sel),
@@ -120,10 +123,12 @@ if_id_reg ifid_sync
 	.instr_in(rdata_a),
 	.pc_in(pc_out),
 	.pc_4_in(pc_plus4),
+	.pred_in(pred),
 	.flush(misprediction),
 	.instr_out(instr_mdr_out),
 	.pc_out(pc_sync_out),
-	.pc_4_out(pc_4_sync)
+	.pc_4_out(pc_4_sync),
+	.pred_out(pred_sync)
 );
 
 
@@ -134,10 +139,12 @@ if_id_reg if_id
 	.instr_in(instr_mdr_out),
 	.pc_in(pc_sync_out),
 	.pc_4_in(pc_4_sync),
+	.pred_in(pred_sync),
 	.flush(misprediction),
 	.instr_out(ifid_instr),
 	.pc_out(ifid_pc),
-	.pc_4_out(ifid_pc_4)
+	.pc_4_out(ifid_pc_4),
+	.pred_out(ifid_pred)
 );
 
 /*
@@ -180,6 +187,14 @@ register id_pc4_sync
 	.out(ifid_pc4_sync)
 );
 
+register #(.width(2)) pred_sync
+(
+	.clk,
+	.load(if_id_load),
+	.in(ifid_pred),
+	.out(ifid_pred_sync)
+);
+
 forwarding_unit lw_hazard_stall
 (
 	.*,
@@ -191,31 +206,31 @@ forwarding_unit lw_hazard_stall
 
 btb btb
 (
-  .clk,
-  .load_btb(misprediction),
-  .target_addr(alu_out),
-  .pc_sync_out,
-  .idex_pc_value(idex_pc), //idex_pc
-  .btb_out
+	.clk,
+	.load_btb(misprediction),
+	.target_addr(alu_out),
+	.pc_out,
+	.idex_pc_value(idex_pc), //idex_pc
+	.btb_out
 );
 
 branch_predictor local_bht
 (
-  .clk,
-  .pc_out,
-  .idex_pc_value(idex_pc),
-  .br_en,
-  .jump(idex_controlw.jump),
+	.clk,
+	.pc_out,
+	.idex_pc_value(idex_pc),
+	.br_en,
+	.jump(idex_controlw.jump),
 	.branch(idex_controlw.branch),
-	.prediction
+	.idex_pred_state,
+	.pred
 );
 
 check_branch_prediction check_branch_prediction
 (
 	.*,
-	.prediction(idex_prediction),
-	.btb_out(idex_btb_out),
-	.opcode(idex_controlw.opcode)
+	.prediction(idex_pred_state[1]),
+	.btb_out(idex_btb_out)
 );
 
 id_ex_reg id_ex
@@ -235,6 +250,7 @@ id_ex_reg id_ex
 	.rs2out_in(rs2_out),
 	.funct3_in(funct3),
 	.funct7_in(funct7),
+	.pred_in(ifid_pred_sync),
 	.flush(misprediction | stall_lw),
 	.pc_out (idex_pc),
 	.pc_4_out(idex_pc_4),
@@ -252,7 +268,8 @@ id_ex_reg id_ex
 	.prediction_in(prediction),
 	.btb_out_in(btb_out),
 	.prediction_out(idex_prediction),
-	.btb_out_out(idex_btb_out)
+	.btb_out_out(idex_btb_out),
+	.pred_out(idex_pred_state)
 );
 
 /*

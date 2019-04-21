@@ -39,47 +39,43 @@ endmodule : bht_array
 
 module branch_predictor
 (
-  input logic clk,
-  input logic [31:0] pc_out,
-  input logic [31:0] idex_pc_value,
-  input logic br_en,
+	input logic 			clk,
+	input logic [31:0] 		pc_out,
+	input logic [31:0] 		idex_pc_value,
+	input logic 			br_en,
 							jump,
 							branch,
 
-  output logic prediction
+	input logic [1:0] 		idex_pred_state,
+  	output logic [1:0]		pred
 );
 
 // Internal Signals
-logic [1:0] pred, new_pred;
-logic pred_load, bht_load;
+logic [1:0] new_pred;
+logic bht_load;
 logic [9:0] rindex, windex;
 
 bht_array bht_array
 (
-  .clk,
-  .read(1'b1),
-  .load(bht_load),
-  .rindex(rindex),
+	.clk,
+	.read(1'b1),
+	.load(bht_load),
+	.rindex(rindex),
 	.windex(windex),
-  .datain(new_pred),
-  .dataout(pred)
+	.datain(new_pred),
+	.dataout(pred)
 );
 
 always_comb begin
-  bht_load = 0;
-  new_pred = 0;
+	new_pred = 0;
 
-  // Read
-  rindex = pc_out[9:0];
-  prediction = pred[1];
+	// Read
+	rindex = pc_out[9:0];
 
-  // Write
+	// Write
 	windex = idex_pc_value[9:0];
-  // if(jump)
-  //   new_pred = 2'b11;
-  // else begin
 	if(branch | jump) begin
-	    case(pred)
+	    case(idex_pred_state)
 	      2'b00 : begin
 	        if(br_en) new_pred = 2'b01;
 	        else new_pred = 2'b00;
@@ -101,8 +97,8 @@ always_comb begin
 	      end
 	    endcase
 	end
-  // end
-  bht_load = 1'b1;
+	// end
+	bht_load = 1'b1;
 end
 
 endmodule : branch_predictor

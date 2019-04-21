@@ -17,7 +17,7 @@ localparam num_sets = 2**s_index;
 
 logic [width-1:0] data [num_sets-1:0] /* synthesis ramstyle = "logic" */;
 // logic [width-1:0] _dataout;
-assign dataout = data[rindex];;
+assign dataout = data[rindex];
 
 /* Initialize array */
 initial
