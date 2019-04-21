@@ -14,18 +14,18 @@ andi x4,x4,0
 one:
   addi x1,x1,1
   addi x1,x1,1
-  j two
+  jal x7, four
   addi x3,x3,1
 
 two:
   addi x2,x2,1
-  j four
   addi x3,x3,1
+  beq x0, x0, one
 
 four:
   addi x4,x4,1
-  j one
-  addi x3,x3,1
+  jalr x8, x7, 0
+  addi x6,x6,1
 
 
 end:

@@ -35,7 +35,7 @@ logic [6:0] funct7;
 logic [31:0] i_imm, s_imm, b_imm, u_imm, j_imm;
 logic [4:0] rs1, rs2, rd;
 logic [31:0] rs1_out, rs2_out;
-logic prediction, misprediction;
+logic prediction, misprediction, load_btb;
 logic [31:0] btb_out;
 //ID_EX
 logic idex_prediction;
@@ -88,7 +88,7 @@ cpu_control ctrl
 );
 
 assign prediction = pred[1];
-assign predmux_sel = {misprediction & ~br_en , prediction & ~misprediction};
+assign predmux_sel = {misprediction & ~br_en & ~idex_controlw.jump, prediction & ~misprediction};
 
 mux4 predmux
 (
@@ -187,7 +187,7 @@ register id_pc4_sync
 	.out(ifid_pc4_sync)
 );
 
-register #(.width(2)) pred_sync
+register #(.width(2)) prediction_sync
 (
 	.clk,
 	.load(if_id_load),
@@ -207,7 +207,7 @@ forwarding_unit lw_hazard_stall
 btb btb
 (
 	.clk,
-	.load_btb(misprediction),
+	.load_btb,
 	.target_addr(alu_out),
 	.pc_out,
 	.idex_pc_value(idex_pc), //idex_pc

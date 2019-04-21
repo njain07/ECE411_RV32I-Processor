@@ -1,7 +1,6 @@
 onerror {resume}
 quietly WaveActivateNextPane {} 0
 add wave -noupdate /mp3_tb/clk
-add wave -noupdate /mp3_tb/halt
 add wave -noupdate /mp3_tb/dut/datapath/pc/out
 add wave -noupdate /mp3_tb/dut/datapath/pcmux/sel
 add wave -noupdate -group mem_signals /mp3_tb/dut/datapath/resp_a
@@ -34,77 +33,77 @@ add wave -noupdate -group {if_id
 } /mp3_tb/dut/datapath/if_id/instr
 add wave -noupdate -group {if_id
 } /mp3_tb/dut/datapath/if_id/pc
-add wave -noupdate -group {id_ex
+add wave -noupdate -expand -group {id_ex
 } /mp3_tb/dut/datapath/id_ex/clk
-add wave -noupdate -group {id_ex
+add wave -noupdate -expand -group {id_ex
 } /mp3_tb/dut/datapath/id_ex/load
-add wave -noupdate -group {id_ex
+add wave -noupdate -expand -group {id_ex
 } /mp3_tb/dut/datapath/id_ex/flush
-add wave -noupdate -group {id_ex
+add wave -noupdate -expand -group {id_ex
 } /mp3_tb/dut/datapath/id_ex/controlw_in
-add wave -noupdate -group {id_ex
+add wave -noupdate -expand -group {id_ex
 } /mp3_tb/dut/datapath/id_ex/controlw_out
-add wave -noupdate -group {id_ex
+add wave -noupdate -expand -group {id_ex
 } /mp3_tb/dut/datapath/id_ex/pc_in
-add wave -noupdate -group {id_ex
+add wave -noupdate -expand -group {id_ex
 } /mp3_tb/dut/datapath/id_ex/i_imm_in
-add wave -noupdate -group {id_ex
+add wave -noupdate -expand -group {id_ex
 } /mp3_tb/dut/datapath/id_ex/s_imm_in
-add wave -noupdate -group {id_ex
+add wave -noupdate -expand -group {id_ex
 } /mp3_tb/dut/datapath/id_ex/b_imm_in
-add wave -noupdate -group {id_ex
+add wave -noupdate -expand -group {id_ex
 } /mp3_tb/dut/datapath/id_ex/u_imm_in
-add wave -noupdate -group {id_ex
+add wave -noupdate -expand -group {id_ex
 } /mp3_tb/dut/datapath/id_ex/j_imm_in
-add wave -noupdate -group {id_ex
+add wave -noupdate -expand -group {id_ex
 } /mp3_tb/dut/datapath/id_ex/rs1out_in
-add wave -noupdate -group {id_ex
+add wave -noupdate -expand -group {id_ex
 } /mp3_tb/dut/datapath/id_ex/rs2out_in
-add wave -noupdate -group {id_ex
+add wave -noupdate -expand -group {id_ex
 } /mp3_tb/dut/datapath/id_ex/funct3_in
-add wave -noupdate -group {id_ex
+add wave -noupdate -expand -group {id_ex
 } /mp3_tb/dut/datapath/id_ex/funct7_in
-add wave -noupdate -group {id_ex
+add wave -noupdate -expand -group {id_ex
 } /mp3_tb/dut/datapath/id_ex/pc_out
-add wave -noupdate -group {id_ex
+add wave -noupdate -expand -group {id_ex
 } /mp3_tb/dut/datapath/id_ex/i_imm_out
-add wave -noupdate -group {id_ex
+add wave -noupdate -expand -group {id_ex
 } /mp3_tb/dut/datapath/id_ex/s_imm_out
-add wave -noupdate -group {id_ex
+add wave -noupdate -expand -group {id_ex
 } /mp3_tb/dut/datapath/id_ex/b_imm_out
-add wave -noupdate -group {id_ex
+add wave -noupdate -expand -group {id_ex
 } /mp3_tb/dut/datapath/id_ex/u_imm_out
-add wave -noupdate -group {id_ex
+add wave -noupdate -expand -group {id_ex
 } /mp3_tb/dut/datapath/id_ex/j_imm_out
-add wave -noupdate -group {id_ex
+add wave -noupdate -expand -group {id_ex
 } /mp3_tb/dut/datapath/id_ex/rs1out_out
-add wave -noupdate -group {id_ex
+add wave -noupdate -expand -group {id_ex
 } /mp3_tb/dut/datapath/id_ex/rs2out_out
-add wave -noupdate -group {id_ex
+add wave -noupdate -expand -group {id_ex
 } /mp3_tb/dut/datapath/id_ex/funct3_out
-add wave -noupdate -group {id_ex
+add wave -noupdate -expand -group {id_ex
 } /mp3_tb/dut/datapath/id_ex/funct7_out
-add wave -noupdate -group {id_ex
+add wave -noupdate -expand -group {id_ex
 } /mp3_tb/dut/datapath/id_ex/controlw
-add wave -noupdate -group {id_ex
+add wave -noupdate -expand -group {id_ex
 } /mp3_tb/dut/datapath/id_ex/funct3
-add wave -noupdate -group {id_ex
+add wave -noupdate -expand -group {id_ex
 } /mp3_tb/dut/datapath/id_ex/funct7
-add wave -noupdate -group {id_ex
+add wave -noupdate -expand -group {id_ex
 } /mp3_tb/dut/datapath/id_ex/pc
-add wave -noupdate -group {id_ex
+add wave -noupdate -expand -group {id_ex
 } /mp3_tb/dut/datapath/id_ex/i_imm
-add wave -noupdate -group {id_ex
+add wave -noupdate -expand -group {id_ex
 } /mp3_tb/dut/datapath/id_ex/s_imm
-add wave -noupdate -group {id_ex
+add wave -noupdate -expand -group {id_ex
 } /mp3_tb/dut/datapath/id_ex/b_imm
-add wave -noupdate -group {id_ex
+add wave -noupdate -expand -group {id_ex
 } /mp3_tb/dut/datapath/id_ex/u_imm
-add wave -noupdate -group {id_ex
+add wave -noupdate -expand -group {id_ex
 } /mp3_tb/dut/datapath/id_ex/j_imm
-add wave -noupdate -group {id_ex
+add wave -noupdate -expand -group {id_ex
 } /mp3_tb/dut/datapath/id_ex/rs1out
-add wave -noupdate -group {id_ex
+add wave -noupdate -expand -group {id_ex
 } /mp3_tb/dut/datapath/id_ex/rs2out
 add wave -noupdate -group {ex_mem
 } /mp3_tb/dut/datapath/ex_mem/clk
@@ -348,8 +347,6 @@ add wave -noupdate -group {btb
 add wave -noupdate -group {btb
 } /mp3_tb/dut/datapath/btb/target_addr
 add wave -noupdate -group {btb
-} /mp3_tb/dut/datapath/btb/pc_sync_out
-add wave -noupdate -group {btb
 } /mp3_tb/dut/datapath/btb/idex_pc_value
 add wave -noupdate -group {btb
 } /mp3_tb/dut/datapath/btb/btb_out
@@ -372,13 +369,9 @@ add wave -noupdate -expand -group {bht
 add wave -noupdate -expand -group {bht
 } /mp3_tb/dut/datapath/local_bht/branch
 add wave -noupdate -expand -group {bht
-} /mp3_tb/dut/datapath/local_bht/prediction
-add wave -noupdate -expand -group {bht
 } /mp3_tb/dut/datapath/local_bht/pred
 add wave -noupdate -expand -group {bht
 } /mp3_tb/dut/datapath/local_bht/new_pred
-add wave -noupdate -expand -group {bht
-} /mp3_tb/dut/datapath/local_bht/pred_load
 add wave -noupdate -expand -group {bht
 } /mp3_tb/dut/datapath/local_bht/bht_load
 add wave -noupdate -expand -group {bht
@@ -390,16 +383,14 @@ add wave -noupdate -expand -group {check_pred
 add wave -noupdate -expand -group {check_pred
 } /mp3_tb/dut/datapath/check_branch_prediction/br_en
 add wave -noupdate -expand -group {check_pred
-} /mp3_tb/dut/datapath/check_branch_prediction/opcode
-add wave -noupdate -expand -group {check_pred
 } /mp3_tb/dut/datapath/check_branch_prediction/btb_out
 add wave -noupdate -expand -group {check_pred
 } /mp3_tb/dut/datapath/check_branch_prediction/alu_out
 add wave -noupdate -expand -group {check_pred
 } /mp3_tb/dut/datapath/check_branch_prediction/misprediction
 TreeUpdate [SetDefaultTree]
-WaveRestoreCursors {{Cursor 1} {13055000 ps} 0}
-quietly wave cursor active 1
+WaveRestoreCursors {{Cursor 3} {21965000 ps} 1} {{Cursor 4} {23205000 ps} 1} {{Cursor 5} {23205000 ps} 0}
+quietly wave cursor active 3
 configure wave -namecolwidth 228
 configure wave -valuecolwidth 159
 configure wave -justifyvalue left
@@ -414,4 +405,4 @@ configure wave -griddelta 40
 configure wave -timeline 0
 configure wave -timelineunits ns
 update
-WaveRestoreZoom {12972968 ps} {13137032 ps}
+WaveRestoreZoom {23162968 ps} {23327032 ps}
