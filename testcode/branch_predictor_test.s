@@ -28,7 +28,7 @@ addi x31, x31, 100
     and  x14, x17, 7
     bne  x14, x0, check_divisible_2
     addi x24, x24, 1
-    bge  x31, x1, check_divisible_2
+    bge  x31, x17, check_divisible_2
 
 
 lw x1, ONE
@@ -39,10 +39,15 @@ lw x5, FIVE
 lw x6, SIX
 lw x7, SEVEN
 lw x8, EIGHT
-lw x9, NINE
-lw x10,TEN
 
-
+lw x10, 0(x1)
+lw x11, 0(x2)
+lw x12, 0(x3)
+lw x13, 0(x4)
+lw x14, 0(x5)
+lw x15, 0(x6)
+lw x16, 0(x7)
+lw x17, 0(x8)
 
 
 ONE:    .word           0x00000000

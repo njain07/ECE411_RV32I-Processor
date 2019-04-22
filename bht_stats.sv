@@ -2,13 +2,14 @@ import rv32i_types::*;
 
 module bht_stats
 (
-    input logic clk,
-    input logic misprediction,
-    input rv32i_control_word idex_controlw
+    input logic                 clk,
+    input logic                 misprediction,
+    input rv32i_control_word    idex_controlw,
+    output logic [31:0]         num_predictions,
+                                num_correct
 );
 
-logic [31:0] num_predictions, num_mispredictions, num_correct;
-
+logic [31:0] num_mispredictions;
 initial begin
     num_predictions = 0;
     num_mispredictions = 0;

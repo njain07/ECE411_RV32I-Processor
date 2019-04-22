@@ -64,6 +64,11 @@ logic [31:0] bren_sync, aluout_sync, controlw_sync, u_imm_sync;
 //WB
 logic [31:0] memwbmux_out;
 
+//Counters
+logic datamux_sel;
+logic [31:0] num_instr_access, num_data_access, num_l1_access, counter_data;
+logic [31:0] instr_cycles, data_cycles, l1_cycles;
+logic [31:0] num_predictions, num_correct, mem_rdata;
 
 //Control
 rv32i_control_word controlw, idex_controlw, exmem_controlw, memwb_controlw;
@@ -254,11 +259,6 @@ check_branch_prediction check_branch_prediction
 	.btb_out(idex_btb_out)
 );
 
-bht_stats branch_pred_stats
-(
-	.*
-);
-
 id_ex_reg id_ex
 (
 	.clk,
@@ -421,9 +421,17 @@ ex_mem_reg ex_mem
  * Memory
  */
 
-assign read_b = exmem_controlw.mem_read;
 assign address_b = exmem_aluout;
-assign write = exmem_controlw.mem_write;
+
+mem_signals mem_signals (.*);
+
+mux2 datamux
+(
+	.sel(datamux_sel),
+	.a(final_rdata_b),
+	.b(counter_data),
+	.f(mem_rdata)
+);
 
 loader rdata_mask
 (
@@ -442,8 +450,18 @@ shifter shift_data
 	.wmask
 );
 
-
 mem_stall stall (.*);
+
+bht_stats branch_pred_stats (.*);
+
+cache_stats stats
+(
+    .*,
+    .instr_access(read_a),
+    .instr_resp(resp_a),
+    .data_access(read_b | write),
+    .data_resp(resp_b)
+);
 
 mem_wb_reg mem_wb
 (
@@ -453,7 +471,7 @@ mem_wb_reg mem_wb
 	.controlw_out(memwb_controlw),
 	.aluout_in(exmem_aluout),
 	.bren_in(exmem_bren),
-	.dmemout_in(final_rdata_b),
+	.dmemout_in(mem_rdata),
 	.u_imm_in(exmem_u_imm),
 	.pc_4_in(exmem_pc_4),
 	.aluout_out(memwb_aluout),
@@ -463,11 +481,10 @@ mem_wb_reg mem_wb
 	.pc_4_out(memwb_pc_4)
 );
 
+
 /*
  * Write back
  */
-
-
 mux8 memwb_mux
 (
 	.sel(memwb_controlw.memwbmux_sel),
@@ -483,9 +500,3 @@ mux8 memwb_mux
 );
 
 endmodule
-
-/*
- * TODO:
- * 1. CP3 test
- * 2. Test L2 cache more
- */
