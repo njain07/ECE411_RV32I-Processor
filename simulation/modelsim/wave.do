@@ -388,6 +388,27 @@ add wave -noupdate -expand -group {check_pred
 } /mp3_tb/dut/datapath/check_branch_prediction/alu_out
 add wave -noupdate -expand -group {check_pred
 } /mp3_tb/dut/datapath/check_branch_prediction/misprediction
+add wave -noupdate -expand -group {bht_stats} /mp3_tb/dut/datapath/branch_pred_stats/clk
+add wave -noupdate -expand -group {bht_stats} /mp3_tb/dut/datapath/branch_pred_stats/misprediction
+add wave -noupdate -expand -group {bht_stats} /mp3_tb/dut/datapath/branch_pred_stats/idex_controlw
+add wave -noupdate -expand -group {bht_stats} -radix decimal /mp3_tb/dut/datapath/branch_pred_stats/num_predictions
+add wave -noupdate -expand -group {bht_stats} -radix decimal /mp3_tb/dut/datapath/branch_pred_stats/num_mispredictions
+add wave -noupdate -expand -group {bht_stats} -radix decimal /mp3_tb/dut/datapath/branch_pred_stats/num_correct
+add wave -noupdate -expand -group cache_stats /mp3_tb/dut/cache/stats/clk
+add wave -noupdate -expand -group cache_stats /mp3_tb/dut/cache/stats/instr_access
+add wave -noupdate -expand -group cache_stats /mp3_tb/dut/cache/stats/instr_resp
+add wave -noupdate -expand -group cache_stats /mp3_tb/dut/cache/stats/data_access
+add wave -noupdate -expand -group cache_stats /mp3_tb/dut/cache/stats/data_resp
+add wave -noupdate -expand -group cache_stats /mp3_tb/dut/cache/stats/l2_access
+add wave -noupdate -expand -group cache_stats /mp3_tb/dut/cache/stats/l2_resp
+add wave -noupdate -expand -group cache_stats -radix decimal /mp3_tb/dut/cache/stats/num_instr_access
+add wave -noupdate -expand -group cache_stats -radix decimal /mp3_tb/dut/cache/stats/num_data_access
+add wave -noupdate -expand -group cache_stats -radix decimal /mp3_tb/dut/cache/stats/num_l1_access
+add wave -noupdate -expand -group cache_stats -radix decimal /mp3_tb/dut/cache/stats/num_l2_access
+add wave -noupdate -expand -group cache_stats -radix decimal /mp3_tb/dut/cache/stats/instr_miss
+add wave -noupdate -expand -group cache_stats -radix decimal /mp3_tb/dut/cache/stats/data_miss
+add wave -noupdate -expand -group cache_stats -radix decimal /mp3_tb/dut/cache/stats/l1_miss
+add wave -noupdate -expand -group cache_stats -radix decimal /mp3_tb/dut/cache/stats/l2_miss
 TreeUpdate [SetDefaultTree]
 WaveRestoreCursors {{Cursor 3} {21965000 ps} 1} {{Cursor 4} {23205000 ps} 1} {{Cursor 5} {23205000 ps} 0}
 quietly wave cursor active 3
@@ -405,4 +426,4 @@ configure wave -griddelta 40
 configure wave -timeline 0
 configure wave -timelineunits ns
 update
-WaveRestoreZoom {23162968 ps} {23327032 ps}
+WaveRestoreZoom {999844140 ps} {1000008204 ps}

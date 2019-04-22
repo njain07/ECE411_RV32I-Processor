@@ -233,6 +233,11 @@ check_branch_prediction check_branch_prediction
 	.btb_out(idex_btb_out)
 );
 
+bht_stats branch_pred_stats
+(
+	.*
+);
+
 id_ex_reg id_ex
 (
 	.clk,
