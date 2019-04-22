@@ -238,8 +238,8 @@ btb btb
 branch_predictor local_bht
 (
 	.clk,
-	.rindex(bhr_out[4:0]),
-	.windex(idex_bhr[4:0]),
+	.rindex(bhr_out),
+	.windex(idex_bhr),
 	.br_en,
 	.jump(idex_controlw.jump),
 	.branch(idex_controlw.branch),
