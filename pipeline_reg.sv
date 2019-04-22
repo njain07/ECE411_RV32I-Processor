@@ -9,23 +9,27 @@ module if_id_reg
                         pc_in,
                         pc_4_in,
   input logic [1:0]     pred_in,
+  input logic [9:0]     bhr_in,
 
   output logic [31:0]   instr_out,
                         pc_out,
                         pc_4_out,
-  output logic [1:0]    pred_out
+  output logic [1:0]    pred_out,
+  output logic [9:0]    bhr_out
 
 );
 
 logic [31:0] instr, pc, pc_plus_4, nop;
 logic [1:0] pred;
+logic [9:0] bhr;
 
 initial
 begin
-    instr = 1'b0;
-    pc = 32'b0;
-    pc_plus_4 = 32'b0;
-    pred = 2'b0;
+    instr = 1'd0;
+    pc = 32'd0;
+    pc_plus_4 = 32'd0;
+    pred = 2'd0;
+    bhr = 10'd0;
 end
 
 assign nop = 32'h00000013;
@@ -38,6 +42,7 @@ begin
         pc <= pc_in;
         pc_plus_4 <= pc_4_in;
         pred <= pred_in;
+        bhr <= bhr_in;
     end
 end
 
@@ -47,6 +52,7 @@ begin
     pc_out = pc;
     pc_4_out = pc_plus_4;
     pred_out = pred;
+    bhr_out = bhr;
 end
 
 endmodule : if_id_reg
@@ -57,7 +63,6 @@ module id_ex_reg
   input logic           clk,
                         load,
                         flush,
-                        prediction_in,
 
   input rv32i_control_word controlw_in,
   output rv32i_control_word controlw_out,
@@ -72,11 +77,12 @@ module id_ex_reg
                         rs1out_in,
                         rs2out_in,
                         btb_out_in,
+  input logic  [1:0]    pred_in,
 
   input logic [2:0]     funct3_in,
   input logic [6:0]     funct7_in,
+  input logic [9:0]     bhr_in,
 
-  output logic          prediction_out,
   output logic [31:0]   pc_out,
                         pc_4_out,
                         i_imm_out,
@@ -88,22 +94,23 @@ module id_ex_reg
                         rs2out_out,
                         btb_out_out,
 
-  input logic  [1:0]    pred_in,
+
   output logic [4:0]    rs1_out,
                         rs2_out,
 
   output logic [2:0]    funct3_out,
   output logic [6:0]    funct7_out,
-  output logic [1:0]    pred_out
+  output logic [1:0]    pred_out,
+  output logic [9:0]    bhr_out
 );
 
 rv32i_control_word controlw;
-logic prediction;
 logic [2:0] funct3;
 logic [6:0] funct7;
 logic [31:0] pc, pc_plus_4, i_imm;
 logic [31:0] s_imm, b_imm, u_imm, j_imm, rs1out, rs2out, btb_out;
 logic [1:0]  pred;
+logic [9:0] bhr;
 
 initial
 begin
@@ -119,9 +126,9 @@ begin
     funct3 = 3'd0;
     funct7 = 7'd0;
     controlw = 64'd0;
-    prediction = 1'd0;
     btb_out = 32'd0;
     pred = 2'd0;
+    bhr = 10'd0;
 end
 
 always_ff @(posedge clk)
@@ -140,9 +147,9 @@ begin
       funct3 <= funct3_in;
       funct7 <= funct7_in;
       controlw <= controlw_in & { {64{~flush}} };
-      prediction <= prediction_in;
       btb_out <= btb_out_in;
       pred <= pred_in;
+      bhr <= bhr_in;
     end
 end
 
@@ -162,9 +169,9 @@ begin
     controlw_out = controlw;
     rs1_out = controlw.rs1;
     rs2_out = controlw.rs2;
-    prediction_out = prediction;
     btb_out_out = btb_out;
     pred_out = pred;
+    bhr_out = bhr;
 end
 
 endmodule : id_ex_reg

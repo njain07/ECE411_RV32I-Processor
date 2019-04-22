@@ -28,6 +28,7 @@ logic if_id_load;
 logic [1:0] predmux_sel, pred_sync, ifid_pred, ifid_pred_sync, pred;
 //IF_ID
 logic [31:0] ifid_instr, ifid_pc, ifid_pc_4, ifid_pc_sync, ifid_pc4_sync;
+logic [9:0] bhr_out, bhr_sync, ifid_bhr, ifid_bhr_sync, idex_bhr;
 //ID
 rv32i_opcode opcode;
 logic [2:0] funct3;
@@ -124,11 +125,13 @@ if_id_reg ifid_sync
 	.pc_in(pc_out),
 	.pc_4_in(pc_plus4),
 	.pred_in(pred),
+	.bhr_in(bhr_out),
 	.flush(misprediction),
 	.instr_out(instr_mdr_out),
 	.pc_out(pc_sync_out),
 	.pc_4_out(pc_4_sync),
-	.pred_out(pred_sync)
+	.pred_out(pred_sync),
+	.bhr_out(bhr_sync)
 );
 
 
@@ -140,11 +143,13 @@ if_id_reg if_id
 	.pc_in(pc_sync_out),
 	.pc_4_in(pc_4_sync),
 	.pred_in(pred_sync),
+	.bhr_in(bhr_sync),
 	.flush(misprediction),
 	.instr_out(ifid_instr),
 	.pc_out(ifid_pc),
 	.pc_4_out(ifid_pc_4),
-	.pred_out(ifid_pred)
+	.pred_out(ifid_pred),
+	.bhr_out(ifid_bhr)
 );
 
 /*
@@ -187,12 +192,20 @@ register id_pc4_sync
 	.out(ifid_pc4_sync)
 );
 
-register #(.width(2)) prediction_sync
+register #(.width(2)) id_pred_sync
 (
 	.clk,
 	.load(if_id_load),
 	.in(ifid_pred),
 	.out(ifid_pred_sync)
+);
+
+register #(.width(10)) id_bhr_sync
+(
+	.clk,
+	.load(if_id_load),
+	.in(ifid_bhr),
+	.out(ifid_bhr_sync)
 );
 
 forwarding_unit lw_hazard_stall
@@ -202,6 +215,14 @@ forwarding_unit lw_hazard_stall
 	.rs2(controlw.rs2),
 	.forwardA(),
 	.forwardB()
+);
+
+register #(.width(10)) bhr
+(
+	.clk,
+	.load,
+	.in({ bhr_out[9:1], ((idex_controlw.branch & br_en) | idex_controlw.jump)} ),
+	.out(bhr_out)
 );
 
 btb btb
@@ -217,8 +238,8 @@ btb btb
 branch_predictor local_bht
 (
 	.clk,
-	.pc_out,
-	.idex_pc_value(idex_pc),
+	.rindex(bhr_out[4:0]),
+	.windex(idex_bhr[4:0]),
 	.br_en,
 	.jump(idex_controlw.jump),
 	.branch(idex_controlw.branch),
@@ -251,6 +272,7 @@ id_ex_reg id_ex
 	.funct3_in(funct3),
 	.funct7_in(funct7),
 	.pred_in(ifid_pred_sync),
+	.bhr_in(ifid_bhr_sync),
 	.flush(misprediction | stall_lw),
 	.pc_out (idex_pc),
 	.pc_4_out(idex_pc_4),
@@ -265,11 +287,10 @@ id_ex_reg id_ex
 	.rs2_out(idex_rs2),
 	.funct3_out(idex_funct3),
 	.funct7_out(idex_funct7),
-	.prediction_in(prediction),
 	.btb_out_in(btb_out),
-	.prediction_out(idex_prediction),
 	.btb_out_out(idex_btb_out),
-	.pred_out(idex_pred_state)
+	.pred_out(idex_pred_state),
+	.bhr_out(idex_bhr)
 );
 
 /*
