@@ -94,7 +94,7 @@ cpu_control ctrl
 );
 
 assign prediction = pred[1];
-assign predmux_sel = {misprediction & ~br_en & ~idex_controlw.jump, prediction & ~misprediction};
+// assign predmux_sel = {misprediction & ~br_en & ~idex_controlw.jump, prediction & ~misprediction};
 
 mux4 predmux
 (
@@ -243,8 +243,8 @@ btb btb
 branch_predictor local_bht
 (
 	.clk,
-	.rindex(pc_out[11:2]),
-	.windex(idex_pc[11:2]),
+	.rindex(pc_out[16:7]),
+	.windex(idex_pc[16:7]),
 	.br_en,
 	.jump(idex_controlw.jump),
 	.branch(idex_controlw.branch),

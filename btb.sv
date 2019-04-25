@@ -26,8 +26,8 @@ rw_array #(.s_index(10), .width(32)) btb_array
 );
 
 always_comb begin
-  rindex = pc_out[9:0];
-  windex = idex_pc_value[9:0];
+  rindex = pc_out[11:2];
+  windex = idex_pc_value[11:2];
 end
 
 endmodule : btb
