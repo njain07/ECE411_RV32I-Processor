@@ -813,7 +813,13 @@ LoopRowsD:
     and x3, x3,x7
     not x7,x7
 
-HALT:
+    addi x20, x0, 28
+Counter:
+    lw x21, 0(x20)
+    addi x20, x20, -4
+    bge x20, x0, Counter
+
+    HALT:
     beq x0, x0, HALT
 
 

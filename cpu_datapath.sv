@@ -225,8 +225,8 @@ forwarding_unit lw_hazard_stall
 register #(.width(10)) bhr
 (
 	.clk,
-	.load(if_id_load),
-	.in({ bhr_out[8:0], ((idex_controlw.branch & br_en) | idex_controlw.jump)} ),
+	.load,
+	.in({ bhr_out[9:1], ((idex_controlw.branch & br_en) | idex_controlw.jump)} ),
 	.out(bhr_out)
 );
 
@@ -236,7 +236,7 @@ btb btb
 	.load_btb,
 	.target_addr(alu_out),
 	.pc_out,
-	.idex_pc_value(idex_pc),
+	.idex_pc_value(idex_pc), //idex_pc
 	.btb_out
 );
 
@@ -248,7 +248,6 @@ branch_predictor local_bht
 	.br_en,
 	.jump(idex_controlw.jump),
 	.branch(idex_controlw.branch),
-	.load_bht(if_id_load),
 	.idex_pred_state,
 	.pred
 );

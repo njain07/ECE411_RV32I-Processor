@@ -1,6 +1,6 @@
 module cache_4way_datapath #(
     parameter s_offset = 5,
-    parameter s_index  = 8,
+    parameter s_index  = 5,
     parameter s_tag    = 32 - s_offset - s_index,
     parameter s_mask   = 2**s_offset,
     parameter s_line   = 8*s_mask,
@@ -67,7 +67,7 @@ assign dirty1_load = dirty_load & comp1_select;
 assign hit = hit0 | hit1;
 
 
-cache_l2_datapath #(.s_index(s_index)) component0
+cache_l2_datapath component0
 (
     .*,
     .array_load(array0_load),
@@ -81,7 +81,7 @@ cache_l2_datapath #(.s_index(s_index)) component0
     .pmem_address(pmem_address0)
 );
 
-cache_l2_datapath #(.s_index(s_index)) component1
+cache_l2_datapath component1
 (
     .*,
     .array_load(array1_load),
