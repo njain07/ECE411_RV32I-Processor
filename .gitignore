@@ -1,4 +1,4 @@
-# Derived from https://raw.githubusercontent.com/thomasrussellmurphy/quartus-DE1_SOC-project/master/.gitignore 
+# Derived from https://raw.githubusercontent.com/thomasrussellmurphy/quartus-DE1_SOC-project/master/.gitignore
 # ignore Quartus II generated folders
 *_sim
 db
@@ -31,3 +31,4 @@ timing
 *.sopc_builder
 *.summary
 *.tcl
+riscv_test_bin
