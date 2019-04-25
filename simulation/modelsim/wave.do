@@ -3,18 +3,18 @@ quietly WaveActivateNextPane {} 0
 add wave -noupdate /mp3_tb/clk
 add wave -noupdate /mp3_tb/dut/datapath/pc/out
 add wave -noupdate /mp3_tb/dut/datapath/pcmux/sel
-add wave -noupdate -group mem_signals /mp3_tb/dut/datapath/resp_a
-add wave -noupdate -group mem_signals /mp3_tb/dut/datapath/resp_b
-add wave -noupdate -group mem_signals /mp3_tb/dut/datapath/rdata_a
-add wave -noupdate -group mem_signals /mp3_tb/dut/datapath/rdata_b
-add wave -noupdate -group mem_signals /mp3_tb/dut/datapath/read_b
-add wave -noupdate -group mem_signals /mp3_tb/dut/datapath/write
-add wave -noupdate -group mem_signals /mp3_tb/dut/datapath/read_a
-add wave -noupdate -group mem_signals /mp3_tb/dut/datapath/wmask
-add wave -noupdate -group mem_signals /mp3_tb/dut/datapath/address_a
-add wave -noupdate -group mem_signals /mp3_tb/dut/datapath/address_b
-add wave -noupdate -group mem_signals /mp3_tb/dut/cache/data_cache/hit
-add wave -noupdate -group mem_signals /mp3_tb/dut/datapath/wdata
+add wave -noupdate -expand -group mem_signals /mp3_tb/dut/datapath/resp_a
+add wave -noupdate -expand -group mem_signals /mp3_tb/dut/datapath/resp_b
+add wave -noupdate -expand -group mem_signals /mp3_tb/dut/datapath/rdata_a
+add wave -noupdate -expand -group mem_signals /mp3_tb/dut/datapath/rdata_b
+add wave -noupdate -expand -group mem_signals /mp3_tb/dut/datapath/read_b
+add wave -noupdate -expand -group mem_signals /mp3_tb/dut/datapath/write
+add wave -noupdate -expand -group mem_signals /mp3_tb/dut/datapath/read_a
+add wave -noupdate -expand -group mem_signals /mp3_tb/dut/datapath/wmask
+add wave -noupdate -expand -group mem_signals /mp3_tb/dut/datapath/address_a
+add wave -noupdate -expand -group mem_signals /mp3_tb/dut/datapath/address_b
+add wave -noupdate -expand -group mem_signals /mp3_tb/dut/cache/data_cache/hit
+add wave -noupdate -expand -group mem_signals /mp3_tb/dut/datapath/wdata
 add wave -noupdate /mp3_tb/dut/datapath/ctrl/opcode
 add wave -noupdate /mp3_tb/dut/datapath/mem_wb/bren
 add wave -noupdate -group {if_id
@@ -328,17 +328,17 @@ add wave -noupdate -group {pmem
 } /mp3_tb/pmem_wdata
 add wave -noupdate -group {pmem
 } /mp3_tb/pmem_rdata
-add wave -noupdate -expand -group {predmux
+add wave -noupdate -group {predmux
 } /mp3_tb/dut/datapath/predmux/sel
-add wave -noupdate -expand -group {predmux
+add wave -noupdate -group {predmux
 } /mp3_tb/dut/datapath/predmux/a
-add wave -noupdate -expand -group {predmux
+add wave -noupdate -group {predmux
 } /mp3_tb/dut/datapath/predmux/b
-add wave -noupdate -expand -group {predmux
+add wave -noupdate -group {predmux
 } /mp3_tb/dut/datapath/predmux/c
-add wave -noupdate -expand -group {predmux
+add wave -noupdate -group {predmux
 } /mp3_tb/dut/datapath/predmux/d
-add wave -noupdate -expand -group {predmux
+add wave -noupdate -group {predmux
 } /mp3_tb/dut/datapath/predmux/f
 add wave -noupdate -group {btb
 } /mp3_tb/dut/datapath/btb/clk
@@ -356,47 +356,73 @@ add wave -noupdate -group {btb
 } /mp3_tb/dut/datapath/btb/rindex
 add wave -noupdate -group {btb
 } /mp3_tb/dut/datapath/btb/windex
-add wave -noupdate -expand -group {bht
+add wave -noupdate -group {bht
 } /mp3_tb/dut/datapath/local_bht/clk
-add wave -noupdate -expand -group {bht
+add wave -noupdate -group {bht
 } /mp3_tb/dut/datapath/local_bht/br_en
-add wave -noupdate -expand -group {bht
+add wave -noupdate -group {bht
 } /mp3_tb/dut/datapath/local_bht/jump
-add wave -noupdate -expand -group {bht
+add wave -noupdate -group {bht
 } /mp3_tb/dut/datapath/local_bht/branch
-add wave -noupdate -expand -group {bht
+add wave -noupdate -group {bht
 } /mp3_tb/dut/datapath/local_bht/pred
-add wave -noupdate -expand -group {bht
+add wave -noupdate -group {bht
 } /mp3_tb/dut/datapath/local_bht/new_pred
-add wave -noupdate -expand -group {bht
+add wave -noupdate -group {bht
 } /mp3_tb/dut/datapath/local_bht/rindex
-add wave -noupdate -expand -group {bht
+add wave -noupdate -group {bht
 } /mp3_tb/dut/datapath/local_bht/windex
-add wave -noupdate -expand -group {check_pred
+add wave -noupdate -group {check_pred
 } /mp3_tb/dut/datapath/check_branch_prediction/prediction
-add wave -noupdate -expand -group {check_pred
+add wave -noupdate -group {check_pred
 } /mp3_tb/dut/datapath/check_branch_prediction/br_en
-add wave -noupdate -expand -group {check_pred
+add wave -noupdate -group {check_pred
 } /mp3_tb/dut/datapath/check_branch_prediction/btb_out
-add wave -noupdate -expand -group {check_pred
+add wave -noupdate -group {check_pred
 } /mp3_tb/dut/datapath/check_branch_prediction/alu_out
-add wave -noupdate -expand -group {check_pred
+add wave -noupdate -group {check_pred
 } /mp3_tb/dut/datapath/check_branch_prediction/misprediction
-add wave -noupdate -expand -group {bht_stats
+add wave -noupdate -group {bht_stats
 } /mp3_tb/dut/datapath/branch_pred_stats/clk
-add wave -noupdate -expand -group {bht_stats
+add wave -noupdate -group {bht_stats
 } /mp3_tb/dut/datapath/branch_pred_stats/misprediction
-add wave -noupdate -expand -group {bht_stats
+add wave -noupdate -group {bht_stats
 } /mp3_tb/dut/datapath/branch_pred_stats/idex_controlw
-add wave -noupdate -expand -group {bht_stats
+add wave -noupdate -group {bht_stats
 } -radix decimal /mp3_tb/dut/datapath/branch_pred_stats/num_predictions
-add wave -noupdate -expand -group {bht_stats
+add wave -noupdate -group {bht_stats
 } -radix decimal /mp3_tb/dut/datapath/branch_pred_stats/num_mispredictions
-add wave -noupdate -expand -group {bht_stats
+add wave -noupdate -group {bht_stats
 } -radix decimal /mp3_tb/dut/datapath/branch_pred_stats/num_correct
+add wave -noupdate -expand -group {cache_stats
+} -radix decimal /mp3_tb/dut/datapath/stats/clk
+add wave -noupdate -expand -group {cache_stats
+} -radix decimal /mp3_tb/dut/datapath/stats/instr_access
+add wave -noupdate -expand -group {cache_stats
+} -radix decimal /mp3_tb/dut/datapath/stats/instr_resp
+add wave -noupdate -expand -group {cache_stats
+} -radix decimal /mp3_tb/dut/datapath/stats/data_access
+add wave -noupdate -expand -group {cache_stats
+} -radix decimal /mp3_tb/dut/datapath/stats/data_resp
+add wave -noupdate -expand -group {cache_stats
+} -radix decimal /mp3_tb/dut/datapath/stats/num_instr_access
+add wave -noupdate -expand -group {cache_stats
+} -radix decimal /mp3_tb/dut/datapath/stats/num_data_access
+add wave -noupdate -expand -group {cache_stats
+} -radix decimal /mp3_tb/dut/datapath/stats/num_l1_access
+add wave -noupdate -expand -group {cache_stats
+} -radix decimal /mp3_tb/dut/datapath/stats/instr_cycles
+add wave -noupdate -expand -group {cache_stats
+} -radix decimal /mp3_tb/dut/datapath/stats/data_cycles
+add wave -noupdate -expand -group {cache_stats
+} -radix decimal /mp3_tb/dut/datapath/stats/l1_cycles
+add wave -noupdate -expand -group {cache_stats
+} /mp3_tb/dut/datapath/stats/load_a
+add wave -noupdate -expand -group {cache_stats
+} /mp3_tb/dut/datapath/stats/load_b
 TreeUpdate [SetDefaultTree]
-WaveRestoreCursors {{Cursor 3} {21965000 ps} 1} {{Cursor 4} {23205000 ps} 1} {{Cursor 5} {23205000 ps} 0}
-quietly wave cursor active 3
+WaveRestoreCursors {{Cursor 5} {509745000 ps} 0}
+quietly wave cursor active 1
 configure wave -namecolwidth 228
 configure wave -valuecolwidth 159
 configure wave -justifyvalue left
@@ -411,4 +437,4 @@ configure wave -griddelta 40
 configure wave -timeline 0
 configure wave -timelineunits ns
 update
-WaveRestoreZoom {999844140 ps} {1000008204 ps}
+WaveRestoreZoom {509662968 ps} {509827032 ps}

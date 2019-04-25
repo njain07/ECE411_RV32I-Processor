@@ -1,6 +1,6 @@
 module cache_datapath #(
     parameter s_offset = 5,
-    parameter s_index  = 3,
+    parameter s_index  = 5,
     parameter s_tag    = 32 - s_offset - s_index,
     parameter s_mask   = 2**s_offset,
     parameter s_line   = 8*s_mask,
@@ -36,18 +36,18 @@ module cache_datapath #(
     output logic [31:0]   pmem_address
 );
 
-logic[23:0] tag_addr;
-logic[2:0] set;
-logic[4:0] offset;
+logic[s_tag-1:0] tag_addr;
+logic[s_index-1:0] set;
+logic[s_offset-1:0] offset;
 
 logic valid1_out, valid2_out, way, lru_out, tag1_hit, tag2_hit, datareadmux_sel;
 logic array1_load, array2_load, lru_in;
 logic way0_select, way1_select;
 logic [1:0] set_dirty, dirty_out;
-logic [23:0] tag1_out, tag2_out, tag_lru;
-logic [255:0] data1_out, data2_out, wdata, wdata256;
-logic [255:0] rdata, rdata256, pmdr_out;
-logic [31:0] data1_load, data2_load, data_load256, data_load;
+logic [s_tag-1:0] tag1_out, tag2_out, tag_lru;
+logic [s_line-1:0] data1_out, data2_out, wdata, wdata256;
+logic [s_line-1:0] rdata, rdata256, pmdr_out;
+logic [s_mask-1:0] data1_load, data2_load, data_load256, data_load;
 
 
 /*
@@ -60,7 +60,7 @@ assign tag_addr = mem_address[31:s_offset+s_index];
 /*
  * Valid
  */
-array valid[1:0]
+array #(.s_index(s_index)) valid[1:0]
 (
     clk,
     array_read,
@@ -75,7 +75,7 @@ array valid[1:0]
  */
 
 assign lru_in = hit ? ~way : ~lru_out;
-array lru
+array #(.s_index(s_index)) lru
 (
   .clk,
   .read(array_read),
@@ -88,7 +88,7 @@ array lru
 /*
  * Dirty
  */
-array dirty[1:0]
+array #(.s_index(s_index)) dirty[1:0]
 (
     clk,
     array_read,
@@ -101,7 +101,7 @@ array dirty[1:0]
 /*
  * Tag
  */
-array #(.width(24)) tag[1:0]
+array #(.width(s_tag), .s_index(s_index)) tag[1:0]
 (
     clk,
     array_read,
@@ -112,7 +112,7 @@ array #(.width(24)) tag[1:0]
 );
 
 
-mux2 #(.width(24)) tagmux
+mux2 #(.width(s_tag)) tagmux
 (
   .sel(lru_out),
   .a(tag1_out),
@@ -160,7 +160,7 @@ mux2 pmemaddr_mux
 assign data1_load = {32{array1_load}} & data_load;
 assign data2_load = {32{array2_load}} & data_load;
 
-data_array line[1:0]
+data_array #(.s_index(s_index)) line[1:0]
 (
     clk,
     array_read,
