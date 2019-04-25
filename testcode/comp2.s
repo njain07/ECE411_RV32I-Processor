@@ -117,7 +117,7 @@ _start:
 	li	a5,12
 	ble	a4,a5,.L13
 .L14:
-	j	.L14
+    j .L14
 foo:
 	addi	sp,sp,-48
 	sw	ra,44(sp)

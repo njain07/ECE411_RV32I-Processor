@@ -22,11 +22,11 @@ always_comb begin
         if (prediction != br_en)
             misprediction = 1;
 
-        end else if (idex_controlw.jump) begin
+    end else if (idex_controlw.jump) begin
         if((btb_out != alu_out) || ~prediction) begin
           misprediction = 1;
           load_btb = 1;
-        end else if (prediction) begin
+    end else if (prediction) begin
         misprediction = 1;
         end
     end
