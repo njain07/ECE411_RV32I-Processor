@@ -226,7 +226,7 @@ register #(.width(10)) bhr
 (
 	.clk,
 	.load,
-	.in({ bhr_out[9:1], ((idex_controlw.branch & br_en) | idex_controlw.jump)} ),
+	.in({ bhr_out[8:0], ((idex_controlw.branch & br_en) | idex_controlw.jump)} ),
 	.out(bhr_out)
 );
 
@@ -248,6 +248,7 @@ branch_predictor local_bht
 	.br_en,
 	.jump(idex_controlw.jump),
 	.branch(idex_controlw.branch),
+	.load_bht(if_id_load),
 	.idex_pred_state,
 	.pred
 );
@@ -452,7 +453,11 @@ shifter shift_data
 
 mem_stall stall (.*);
 
-bht_stats branch_pred_stats (.*);
+bht_stats branch_pred_stats
+(
+	.*,
+	.load(if_id_load)
+);
 
 cache_stats stats
 (

@@ -47,6 +47,7 @@ module branch_predictor #(
 	input logic 				br_en,
 								jump,
 								branch,
+								load_bht,
 
 	input logic [1:0] 			idex_pred_state,
   	output logic [1:0]			pred
@@ -58,7 +59,7 @@ bht_array #(.s_index(s_index)) bht_array
 (
 	.clk,
 	.read(1'b1),
-	.load(1'b1),
+	.load(load_bht),
 	.rindex(rindex),
 	.windex(windex),
 	.datain(new_pred),
@@ -68,29 +69,27 @@ bht_array #(.s_index(s_index)) bht_array
 always_comb begin
 	new_pred = 0;
 
-	if(branch | jump) begin
-	    case(idex_pred_state)
-	      2'b00 : begin
-	        if(br_en) new_pred = 2'b01;
-	        else new_pred = 2'b00;
-	      end
+    case(idex_pred_state)
+      2'b00 : begin
+        if((branch & br_en) | jump) new_pred = 2'b01;
+        else new_pred = 2'b00;
+      end
 
-	      2'b01 : begin
-	        if(br_en) new_pred = 2'b10;
-	        else new_pred = 2'b00;
-	      end
+      2'b01 : begin
+        if((branch & br_en) | jump) new_pred = 2'b10;
+        else new_pred = 2'b00;
+      end
 
-	      2'b10 : begin
-	        if(br_en) new_pred = 2'b11;
-	        else new_pred = 2'b01;
-	      end
+      2'b10 : begin
+        if((branch & br_en) | jump) new_pred = 2'b11;
+        else new_pred = 2'b01;
+      end
 
-	      2'b11 : begin
-	        if(br_en) new_pred = 2'b11;
-	        else new_pred = 2'b10;
-	      end
-	    endcase
-	end
+      2'b11 : begin
+        if((branch & br_en) | jump) new_pred = 2'b11;
+        else new_pred = 2'b10;
+      end
+    endcase
 end
 
 endmodule : branch_predictor
