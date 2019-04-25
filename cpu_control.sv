@@ -44,6 +44,8 @@ begin
 			cword.load_regfile = 1;
 			cword.memwbmux_sel = 2;
 			cword.rs2 = 0;
+			cword.rs1 = 0;
+			cword.alumux2_sel = 1;
 		end
 
 		op_auipc : begin
