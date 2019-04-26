@@ -32,7 +32,7 @@ begin
     bhr = 10'd0;
 end
 
-assign nop = 32'h00000013;
+assign nop = 32'h00000000;
 
 always_ff @(posedge clk)
 begin

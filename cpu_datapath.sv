@@ -81,7 +81,7 @@ rv32i_control_word controlw, idex_controlw, exmem_controlw, memwb_controlw;
 assign pc_plus4 = pc_out + 4;
 assign address_a = pc_out;
 assign read_a = 1;
-assign nop = 32'h00000013;
+assign nop = 32'h00000000;
 
 assign if_id_load = load & ~stall_lw;
 
@@ -243,8 +243,8 @@ btb btb
 branch_predictor local_bht
 (
 	.clk,
-	.rindex(pc_out[16:7]),
-	.windex(idex_pc[16:7]),
+	.rindex(bhr),
+	.windex(idex_bhr),
 	.br_en,
 	.jump(idex_controlw.jump),
 	.branch(idex_controlw.branch),
