@@ -68,7 +68,7 @@ logic [31:0] memwbmux_out;
 logic datamux_sel;
 logic [31:0] num_instr_access, num_data_access, num_l1_access, counter_data;
 logic [31:0] instr_cycles, data_cycles, l1_cycles;
-logic [31:0] num_predictions, num_correct, mem_rdata;
+logic [31:0] num_predictions, num_correct, mem_rdata, num_mispredictions, num_instr;
 
 //Control
 rv32i_control_word controlw, idex_controlw, exmem_controlw, memwb_controlw;
@@ -243,8 +243,8 @@ btb btb
 branch_predictor local_bht
 (
 	.clk,
-	.rindex(bhr),
-	.windex(idex_bhr),
+	.rindex(pc_out[11:2]),
+	.windex(idex_pc[11:2]),
 	.br_en,
 	.jump(idex_controlw.jump),
 	.branch(idex_controlw.branch),

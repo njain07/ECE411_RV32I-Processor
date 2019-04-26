@@ -11,7 +11,7 @@ module mem_signals
         						data_cycles,
         						l1_cycles,
                                 num_predictions,
-                                num_correct,
+                                num_mispredictions,
     output logic                read_b,
                                 write,
                                 datamux_sel,
@@ -28,7 +28,7 @@ mux8 dataoutmux
     .e(data_cycles),
     .f(l1_cycles),
     .g(num_predictions),
-    .h(num_correct),
+    .h(num_mispredictions),
     .q(counter_data)
 );
 
