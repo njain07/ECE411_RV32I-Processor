@@ -1,6 +1,8 @@
 import rv32i_types::*;
 
-module btb
+module btb #(
+	parameter s_index = 10
+)
 (
   input logic           clk,
                         load_btb,
@@ -12,9 +14,9 @@ module btb
 
 // Internal signals
 logic btb_load;
-logic [9:0] rindex, windex;
+logic [s_index-1:0] rindex, windex;
 
-rw_array #(.s_index(10), .width(32)) btb_array
+rw_array #(.s_index(s_index), .width(32)) btb_array
 (
   .clk,
   .read(1'b1),
@@ -26,8 +28,8 @@ rw_array #(.s_index(10), .width(32)) btb_array
 );
 
 always_comb begin
-  rindex = pc_out[11:2];
-  windex = idex_pc_value[11:2];
+  rindex = pc_out[s_index+1:2];
+  windex = idex_pc_value[s_index+1:2];
 end
 
 endmodule : btb

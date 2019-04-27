@@ -1,6 +1,8 @@
 import rv32i_types::*;
 
-module if_id_reg
+module if_id_reg #(
+	parameter bhr_width = 10
+)
 (
   input logic           clk,
                         load,
@@ -9,19 +11,19 @@ module if_id_reg
                         pc_in,
                         pc_4_in,
   input logic [1:0]     pred_in,
-  input logic [9:0]     bhr_in,
+  input logic [bhr_width-1:0]     bhr_in,
 
   output logic [31:0]   instr_out,
                         pc_out,
                         pc_4_out,
   output logic [1:0]    pred_out,
-  output logic [9:0]    bhr_out
+  output logic [bhr_width-1:0]    bhr_out
 
 );
 
 logic [31:0] instr, pc, pc_plus_4, nop;
 logic [1:0] pred;
-logic [9:0] bhr;
+logic [bhr_width-1:0] bhr;
 
 initial
 begin
@@ -29,7 +31,7 @@ begin
     pc = 32'd0;
     pc_plus_4 = 32'd0;
     pred = 2'd0;
-    bhr = 10'd0;
+    bhr = 0;
 end
 
 assign nop = 32'h00000000;
@@ -58,7 +60,9 @@ end
 endmodule : if_id_reg
 
 
-module id_ex_reg
+module id_ex_reg #(
+	parameter bhr_width = 10
+)
 (
   input logic           clk,
                         load,
@@ -81,7 +85,7 @@ module id_ex_reg
 
   input logic [2:0]     funct3_in,
   input logic [6:0]     funct7_in,
-  input logic [9:0]     bhr_in,
+  input logic [bhr_width-1:0]     bhr_in,
 
   output logic [31:0]   pc_out,
                         pc_4_out,
@@ -101,7 +105,7 @@ module id_ex_reg
   output logic [2:0]    funct3_out,
   output logic [6:0]    funct7_out,
   output logic [1:0]    pred_out,
-  output logic [9:0]    bhr_out
+  output logic [bhr_width-1:0]    bhr_out
 );
 
 rv32i_control_word controlw;
@@ -110,7 +114,7 @@ logic [6:0] funct7;
 logic [31:0] pc, pc_plus_4, i_imm;
 logic [31:0] s_imm, b_imm, u_imm, j_imm, rs1out, rs2out, btb_out;
 logic [1:0]  pred;
-logic [9:0] bhr;
+logic [bhr_width-1:0] bhr;
 
 initial
 begin

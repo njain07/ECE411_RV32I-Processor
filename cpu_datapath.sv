@@ -21,6 +21,8 @@ module cpu_datapath
 						wdata
 );
 
+localparam bhr_width = 11;
+
 //Internal signals
 //IF
 logic [31:0] pc_plus4, pcmux_out, pc_out, pc_sync_out, pc_4_sync, instr_mdr_out, nop, targ_addr;
@@ -28,7 +30,7 @@ logic if_id_load;
 logic [1:0] predmux_sel, pred_sync, ifid_pred, ifid_pred_sync, pred;
 //IF_ID
 logic [31:0] ifid_instr, ifid_pc, ifid_pc_4, ifid_pc_sync, ifid_pc4_sync;
-logic [9:0] bhr_out, bhr_sync, ifid_bhr, ifid_bhr_sync, idex_bhr;
+logic [bhr_width-1:0] bhr_out, bhr_sync, ifid_bhr, ifid_bhr_sync, idex_bhr;
 //ID
 rv32i_opcode opcode;
 logic [2:0] funct3;
@@ -122,7 +124,7 @@ pc_register pc
     .out(pc_out)
 );
 
-if_id_reg ifid_sync
+if_id_reg #(.bhr_width(bhr_width)) ifid_sync
 (
 	.clk,
 	.load(if_id_load),
@@ -140,7 +142,7 @@ if_id_reg ifid_sync
 );
 
 
-if_id_reg if_id
+if_id_reg #(.bhr_width(bhr_width)) if_id
 (
 	.clk,
 	.load(if_id_load), //to be changed for data hazards
@@ -205,7 +207,7 @@ register #(.width(2)) id_pred_sync
 	.out(ifid_pred_sync)
 );
 
-register #(.width(10)) id_bhr_sync
+register #(.width(bhr_width)) id_bhr_sync
 (
 	.clk,
 	.load(if_id_load),
@@ -222,15 +224,15 @@ forwarding_unit lw_hazard_stall
 	.forwardB()
 );
 
-register #(.width(10)) bhr
+register #(.width(bhr_width)) bhr
 (
 	.clk,
 	.load,
-	.in({ bhr_out[8:0], ((idex_controlw.branch & br_en) | idex_controlw.jump)} ),
+	.in({ bhr_out[bhr_width-2:0], ((idex_controlw.branch & br_en) | idex_controlw.jump)} ),
 	.out(bhr_out)
 );
 
-btb btb
+btb #(.s_index(bhr_width)) btb
 (
 	.clk,
 	.load_btb,
@@ -240,11 +242,11 @@ btb btb
 	.btb_out
 );
 
-branch_predictor local_bht
+branch_predictor #(.s_index(bhr_width)) local_bht
 (
 	.clk,
-	.rindex(pc_out[11:2]),
-	.windex(idex_pc[11:2]),
+	.rindex(pc_out[bhr_width+1:2] ^ bhr_out),
+	.windex(idex_pc[bhr_width+1:2] ^ bhr_out),
 	.br_en,
 	.jump(idex_controlw.jump),
 	.branch(idex_controlw.branch),
@@ -260,7 +262,7 @@ check_branch_prediction check_branch_prediction
 	.btb_out(idex_btb_out)
 );
 
-id_ex_reg id_ex
+id_ex_reg #(.bhr_width(bhr_width)) id_ex
 (
 	.clk,
 	.load, //to be changed

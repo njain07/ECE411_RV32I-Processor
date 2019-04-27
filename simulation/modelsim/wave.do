@@ -466,18 +466,6 @@ add wave -noupdate -expand -group {check_pred
 } /mp3_tb/dut/datapath/check_branch_prediction/load_btb
 add wave -noupdate -expand -group {check_pred
 } /mp3_tb/dut/datapath/check_branch_prediction/predmux_sel
-add wave -noupdate -group {bht_stats
-} /mp3_tb/dut/datapath/branch_pred_stats/clk
-add wave -noupdate -group {bht_stats
-} /mp3_tb/dut/datapath/branch_pred_stats/misprediction
-add wave -noupdate -group {bht_stats
-} /mp3_tb/dut/datapath/branch_pred_stats/idex_controlw
-add wave -noupdate -group {bht_stats
-} -radix decimal /mp3_tb/dut/datapath/branch_pred_stats/num_predictions
-add wave -noupdate -group {bht_stats
-} -radix decimal /mp3_tb/dut/datapath/branch_pred_stats/num_mispredictions
-add wave -noupdate -group {bht_stats
-} -radix decimal /mp3_tb/dut/datapath/branch_pred_stats/num_correct
 add wave -noupdate -group {cache_stats
 } -radix decimal /mp3_tb/dut/datapath/stats/clk
 add wave -noupdate -group {cache_stats
@@ -504,8 +492,15 @@ add wave -noupdate -group {cache_stats
 } /mp3_tb/dut/datapath/stats/load_a
 add wave -noupdate -group {cache_stats
 } /mp3_tb/dut/datapath/stats/load_b
+add wave -noupdate -expand -group {bht_stats} /mp3_tb/dut/datapath/branch_pred_stats/clk
+add wave -noupdate -expand -group {bht_stats} /mp3_tb/dut/datapath/branch_pred_stats/load
+add wave -noupdate -expand -group {bht_stats} /mp3_tb/dut/datapath/branch_pred_stats/misprediction
+add wave -noupdate -expand -group {bht_stats} /mp3_tb/dut/datapath/branch_pred_stats/idex_controlw
+add wave -noupdate -expand -group {bht_stats} /mp3_tb/dut/datapath/branch_pred_stats/num_predictions
+add wave -noupdate -expand -group {bht_stats} /mp3_tb/dut/datapath/branch_pred_stats/num_mispredictions
+add wave -noupdate -expand -group {bht_stats} /mp3_tb/dut/datapath/branch_pred_stats/num_instr
 TreeUpdate [SetDefaultTree]
-WaveRestoreCursors {{Cursor 5} {514825000 ps} 0}
+WaveRestoreCursors {{Cursor 5} {927345000 ps} 0}
 quietly wave cursor active 1
 configure wave -namecolwidth 228
 configure wave -valuecolwidth 159
@@ -521,4 +516,4 @@ configure wave -griddelta 40
 configure wave -timeline 0
 configure wave -timelineunits ns
 update
-WaveRestoreZoom {514742968 ps} {514907032 ps}
+WaveRestoreZoom {927262968 ps} {927427032 ps}
