@@ -492,13 +492,26 @@ add wave -noupdate -group {cache_stats
 } /mp3_tb/dut/datapath/stats/load_a
 add wave -noupdate -group {cache_stats
 } /mp3_tb/dut/datapath/stats/load_b
-add wave -noupdate -expand -group {bht_stats} /mp3_tb/dut/datapath/branch_pred_stats/clk
-add wave -noupdate -expand -group {bht_stats} /mp3_tb/dut/datapath/branch_pred_stats/load
-add wave -noupdate -expand -group {bht_stats} /mp3_tb/dut/datapath/branch_pred_stats/misprediction
-add wave -noupdate -expand -group {bht_stats} /mp3_tb/dut/datapath/branch_pred_stats/idex_controlw
-add wave -noupdate -expand -group {bht_stats} /mp3_tb/dut/datapath/branch_pred_stats/num_predictions
-add wave -noupdate -expand -group {bht_stats} /mp3_tb/dut/datapath/branch_pred_stats/num_mispredictions
-add wave -noupdate -expand -group {bht_stats} /mp3_tb/dut/datapath/branch_pred_stats/num_instr
+add wave -noupdate -expand -group {bht_stats
+} /mp3_tb/dut/datapath/branch_pred_stats/clk
+add wave -noupdate -expand -group {bht_stats
+} /mp3_tb/dut/datapath/branch_pred_stats/load
+add wave -noupdate -expand -group {bht_stats
+} /mp3_tb/dut/datapath/branch_pred_stats/misprediction
+add wave -noupdate -expand -group {bht_stats
+} /mp3_tb/dut/datapath/branch_pred_stats/idex_controlw
+add wave -noupdate -expand -group {bht_stats
+} /mp3_tb/dut/datapath/branch_pred_stats/num_predictions
+add wave -noupdate -expand -group {bht_stats
+} /mp3_tb/dut/datapath/branch_pred_stats/num_mispredictions
+add wave -noupdate -expand -group {bht_stats
+} /mp3_tb/dut/datapath/branch_pred_stats/num_instr
+add wave -noupdate -expand -group {tourney} /mp3_tb/dut/datapath/tourney/clk
+add wave -noupdate -expand -group {tourney} /mp3_tb/dut/datapath/tourney/state
+add wave -noupdate -expand -group {tourney} /mp3_tb/dut/datapath/tourney/next_state
+add wave -noupdate -expand -group {tourney} /mp3_tb/dut/datapath/tourney/take_branch
+add wave -noupdate -expand -group {tourney} /mp3_tb/dut/datapath/tourney/local_correct
+add wave -noupdate -expand -group {tourney} /mp3_tb/dut/datapath/tourney/global_correct
 TreeUpdate [SetDefaultTree]
 WaveRestoreCursors {{Cursor 5} {927345000 ps} 0}
 quietly wave cursor active 1
