@@ -4,25 +4,29 @@ module if_id_reg #(
 	parameter bhr_width = 10
 )
 (
-  input logic           clk,
-                        load,
-                        flush,
-  input logic [31:0]    instr_in,
-                        pc_in,
-                        pc_4_in,
-  input logic [1:0]     pred_in,
-  input logic [bhr_width-1:0]     bhr_in,
+  input logic                   clk,
+                                load,
+                                flush,
+  input logic [31:0]            instr_in,
+                                pc_in,
+                                pc_4_in,
+  input logic [1:0]             pred_in,
+                                local_pred_in,
+                                global_pred_in,
+  input logic [bhr_width-1:0]   bhr_in,
 
-  output logic [31:0]   instr_out,
-                        pc_out,
-                        pc_4_out,
-  output logic [1:0]    pred_out,
-  output logic [bhr_width-1:0]    bhr_out
+  output logic [31:0]           instr_out,
+                                pc_out,
+                                pc_4_out,
+  output logic [1:0]            pred_out,
+                                local_pred_out,
+                                global_pred_out,
+  output logic [bhr_width-1:0]  bhr_out
 
 );
 
 logic [31:0] instr, pc, pc_plus_4, nop;
-logic [1:0] pred;
+logic [1:0] pred, local_pred, global_pred;
 logic [bhr_width-1:0] bhr;
 
 initial
@@ -44,6 +48,8 @@ begin
         pc <= pc_in;
         pc_plus_4 <= pc_4_in;
         pred <= pred_in;
+        local_pred <= local_pred_in;
+        global_pred <= global_pred_in;
         bhr <= bhr_in;
     end
 end
@@ -54,58 +60,112 @@ begin
     pc_out = pc;
     pc_4_out = pc_plus_4;
     pred_out = pred;
+    local_pred_out = local_pred;
+    global_pred_out = global_pred;
     bhr_out = bhr;
 end
 
 endmodule : if_id_reg
+
+module ir_sync_reg #(
+    parameter bhr_width = 10
+)
+(
+    input logic                     clk,
+                                    load,
+    input logic [31:0]              pc_in,
+                                    pc_4_in,
+    input logic [1:0]               pred_in,
+                                    local_pred_in,
+                                    global_pred_in,
+    input logic[bhr_width-1:0]      bhr_in,
+    output logic [31:0]             pc_out,
+                                    pc_4_out,
+    output logic [1:0]              pred_out,
+                                    local_pred_out,
+                                    global_pred_out,
+    output logic [bhr_width-1:0]    bhr_out
+);
+
+logic [31:0] pc, pc_4;
+logic [1:0] pred, local_pred, global_pred;
+logic [bhr_width-1:0] bhr;
+
+always_ff @ (posedge clk)
+begin
+    if (load)
+    begin
+        pc <= pc_in;
+        pc_4 <= pc_4_in;
+        pred <= pred_in;
+        local_pred <= local_pred_in;
+        global_pred <= global_pred_in;
+        bhr <= bhr_in;
+    end
+end
+
+always_comb
+begin
+    pc_out = pc;
+    pc_4_out = pc;
+    pred_out = pred;
+    local_pred_out = local_pred;
+    global_pred_out = global_pred;
+    bhr_out = bhr;
+end
+
+endmodule
 
 
 module id_ex_reg #(
 	parameter bhr_width = 10
 )
 (
-  input logic           clk,
-                        load,
-                        flush,
+  input logic                   clk,
+                                load,
+                                flush,
 
-  input rv32i_control_word controlw_in,
-  output rv32i_control_word controlw_out,
+  input rv32i_control_word      controlw_in,
+  output rv32i_control_word     controlw_out,
 
-  input logic [31:0]    pc_in,
-                        pc_4_in,
-                        i_imm_in,
-                        s_imm_in,
-                        b_imm_in,
-                        u_imm_in,
-                        j_imm_in,
-                        rs1out_in,
-                        rs2out_in,
-                        btb_out_in,
-  input logic  [1:0]    pred_in,
+  input logic [31:0]            pc_in,
+                                pc_4_in,
+                                i_imm_in,
+                                s_imm_in,
+                                b_imm_in,
+                                u_imm_in,
+                                j_imm_in,
+                                rs1out_in,
+                                rs2out_in,
+                                btb_out_in,
+  input logic  [1:0]            pred_in,
+                                local_pred_in,
+                                global_pred_in,
 
-  input logic [2:0]     funct3_in,
-  input logic [6:0]     funct7_in,
-  input logic [bhr_width-1:0]     bhr_in,
+  input logic [2:0]             funct3_in,
+  input logic [6:0]             funct7_in,
+  input logic [bhr_width-1:0]   bhr_in,
 
-  output logic [31:0]   pc_out,
-                        pc_4_out,
-                        i_imm_out,
-                        s_imm_out,
-                        b_imm_out,
-                        u_imm_out,
-                        j_imm_out,
-                        rs1out_out,
-                        rs2out_out,
-                        btb_out_out,
+  output logic [31:0]           pc_out,
+                                pc_4_out,
+                                i_imm_out,
+                                s_imm_out,
+                                b_imm_out,
+                                u_imm_out,
+                                j_imm_out,
+                                rs1out_out,
+                                rs2out_out,
+                                btb_out_out,
 
+  output logic [4:0]            rs1_out,
+                                rs2_out,
 
-  output logic [4:0]    rs1_out,
-                        rs2_out,
-
-  output logic [2:0]    funct3_out,
-  output logic [6:0]    funct7_out,
-  output logic [1:0]    pred_out,
-  output logic [bhr_width-1:0]    bhr_out
+  output logic [2:0]            funct3_out,
+  output logic [6:0]            funct7_out,
+  output logic [1:0]            pred_out,
+                                local_pred_out,
+                                global_pred_out,
+  output logic [bhr_width-1:0]  bhr_out
 );
 
 rv32i_control_word controlw;
@@ -153,6 +213,8 @@ begin
       controlw <= controlw_in & { {64{~flush}} };
       btb_out <= btb_out_in;
       pred <= pred_in;
+      local_pred <= local_pred_in;
+      global_pred <= global_pred_in;
       bhr <= bhr_in;
     end
 end
@@ -175,6 +237,8 @@ begin
     rs2_out = controlw.rs2;
     btb_out_out = btb_out;
     pred_out = pred;
+    local_pred_out = local_pred;
+    global_pred_out = global_pred;
     bhr_out = bhr;
 end
 

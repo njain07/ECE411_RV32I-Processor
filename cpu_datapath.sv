@@ -76,17 +76,8 @@ logic [31:0] num_predictions, num_correct, mem_rdata, num_mispredictions, num_in
 rv32i_control_word controlw, idex_controlw, exmem_controlw, memwb_controlw;
 
 /*
- * Instruction fetch
+ * Control
  */
-
-// assign nop = 32'h00000013;
-assign pc_plus4 = pc_out + 4;
-assign address_a = pc_out;
-assign read_a = 1;
-assign nop = 32'h00000000;
-
-assign if_id_load = load & ~stall_lw;
-
 cpu_control ctrl
 (
 	.*,
@@ -95,8 +86,77 @@ cpu_control ctrl
 	.cword(controlw)
 );
 
+/*
+ * Branch predictor
+ */
+
+register #(.width(bhr_width)) bhr
+(
+	.clk,
+	.load,
+	.in({ bhr_out[bhr_width-2:0], ((idex_controlw.branch & br_en) | idex_controlw.jump)} ),
+	.out(bhr_out)
+);
+
+btb #(.s_index(bhr_width)) btb
+(
+	.clk,
+	.load_btb,
+	.target_addr(alu_out),
+	.pc_out,
+	.idex_pc_value(idex_pc), //idex_pc
+	.btb_out
+);
+
+branch_predictor #(.s_index(bhr_width)) global_pht
+(
+	.clk,
+	.rindex(pc_out[bhr_width+1:2] ^ bhr_out),
+	.windex(idex_pc[bhr_width+1:2] ^ bhr_out),
+	.br_en,
+	.jump(idex_controlw.jump),
+	.branch(idex_controlw.branch),
+	.load_bht(if_id_load),
+	.idex_pred_state,
+	.pred(global_prediction)
+);
+
+branch_predictor #(.s_index(bhr_width)) local_bht
+(
+	.clk,
+	.rindex(pc_out[bhr_width+1:2]),
+	.windex(idex_pc[bhr_width+1:2]),
+	.br_en,
+	.jump(idex_controlw.jump),
+	.branch(idex_controlw.branch),
+	.load_bht(if_id_load),
+	.idex_pred_state,
+	.pred(local_prediction)
+);
+
+tournament_predictor tourney
+(
+	.*,
+	.local_prediction (idex_local_pred[1]),
+	.global_prediction(idex_global_pred[1])
+);
+
+mux2 tournament_mux
+(
+	.sel(predictor),
+	.a(local_prediction),
+	.b(global_prediction),
+	.f(pred)
+);
+
+check_branch_prediction check_branch_prediction
+(
+	.*,
+	.prediction(idex_pred_state[1]),
+	.btb_out(idex_btb_out)
+);
+
 assign prediction = pred[1];
-// assign predmux_sel = {misprediction & ~br_en & ~idex_controlw.jump, prediction & ~misprediction};
 
 mux4 predmux
 (
@@ -107,6 +167,17 @@ mux4 predmux
 	.d(idex_pc_4),
 	.f(targ_addr)
 );
+
+/*
+ * Instruction fetch
+ */
+
+assign pc_plus4 = pc_out + 4;
+assign address_a = pc_out;
+assign read_a = 1;
+assign nop = 32'h00000000;
+
+assign if_id_load = load & ~stall_lw;
 
 mux2 pcmux
 (
@@ -132,12 +203,16 @@ if_id_reg #(.bhr_width(bhr_width)) ifid_sync
 	.pc_in(pc_out),
 	.pc_4_in(pc_plus4),
 	.pred_in(pred),
+	.local_pred_in(local_prediction),
+	.global_pred_in(global_prediction),
 	.bhr_in(bhr_out),
 	.flush(misprediction),
 	.instr_out(instr_mdr_out),
 	.pc_out(pc_sync_out),
 	.pc_4_out(pc_4_sync),
 	.pred_out(pred_sync),
+	.local_pred_out(localpred_sync),
+	.global_pred_out(globalpred_sync),
 	.bhr_out(bhr_sync)
 );
 
@@ -150,12 +225,16 @@ if_id_reg #(.bhr_width(bhr_width)) if_id
 	.pc_in(pc_sync_out),
 	.pc_4_in(pc_4_sync),
 	.pred_in(pred_sync),
+	.local_pred_in(localpred_sync),
+	.global_pred_in(globalpred_sync),
 	.bhr_in(bhr_sync),
 	.flush(misprediction),
 	.instr_out(ifid_instr),
 	.pc_out(ifid_pc),
 	.pc_4_out(ifid_pc_4),
 	.pred_out(ifid_pred),
+	.local_pred_out(ifid_local_pred),
+	.global_pred_out(ifid_global_pred),
 	.bhr_out(ifid_bhr)
 );
 
@@ -171,48 +250,22 @@ ir IR
    .in(misprediction ? nop : ifid_instr)
 );
 
-regfile regfile
-(
-    .clk,
-    .load(memwb_controlw.load_regfile),
-    .in(memwbmux_out),
-    .src_a(idex_controlw.rs1),
-    .src_b(idex_controlw.rs2),
-    .dest(memwb_controlw.rd),
-    .reg_a(rs1_out),
-    .reg_b(rs2_out)
-);
-
-register id_pc_sync
+ir_sync_reg #(.bhr_width(bhr_width)) ir_sync
 (
 	.clk,
 	.load(if_id_load),
-	.in(ifid_pc),
-	.out(ifid_pc_sync)
-);
-
-register id_pc4_sync
-(
-	.clk,
-	.load(if_id_load),
-	.in(ifid_pc_4),
-	.out(ifid_pc4_sync)
-);
-
-register #(.width(2)) id_pred_sync
-(
-	.clk,
-	.load(if_id_load),
-	.in(ifid_pred),
-	.out(ifid_pred_sync)
-);
-
-register #(.width(bhr_width)) id_bhr_sync
-(
-	.clk,
-	.load(if_id_load),
-	.in(ifid_bhr),
-	.out(ifid_bhr_sync)
+	.pc_in(ifid_pc),
+	.pc_4_in(ifid_pc_4),
+	.pred_in(ifid_pred),
+	.local_pred_in(ifid_local_pred),
+	.global_pred_in(ifid_global_pred),
+	.bhr_in(ifid_bhr),
+	.pc_out(ifid_pc_sync),
+	.pc_4_out(ifid_pc4_sync),
+	.pred_out(ifid_pred_sync),
+	.local_pred_out(ifid_localpred_sync),
+	.global_pred_out(ifid_globalpred_sync),
+	.bhr_out(ifid_bhr_sync)
 );
 
 forwarding_unit lw_hazard_stall
@@ -224,43 +277,6 @@ forwarding_unit lw_hazard_stall
 	.forwardB()
 );
 
-register #(.width(bhr_width)) bhr
-(
-	.clk,
-	.load,
-	.in({ bhr_out[bhr_width-2:0], ((idex_controlw.branch & br_en) | idex_controlw.jump)} ),
-	.out(bhr_out)
-);
-
-btb #(.s_index(bhr_width)) btb
-(
-	.clk,
-	.load_btb,
-	.target_addr(alu_out),
-	.pc_out,
-	.idex_pc_value(idex_pc), //idex_pc
-	.btb_out
-);
-
-branch_predictor #(.s_index(bhr_width)) local_bht
-(
-	.clk,
-	.rindex(pc_out[bhr_width+1:2] ^ bhr_out),
-	.windex(idex_pc[bhr_width+1:2] ^ bhr_out),
-	.br_en,
-	.jump(idex_controlw.jump),
-	.branch(idex_controlw.branch),
-	.load_bht(if_id_load),
-	.idex_pred_state,
-	.pred
-);
-
-check_branch_prediction check_branch_prediction
-(
-	.*,
-	.prediction(idex_pred_state[1]),
-	.btb_out(idex_btb_out)
-);
 
 id_ex_reg #(.bhr_width(bhr_width)) id_ex
 (
@@ -280,6 +296,8 @@ id_ex_reg #(.bhr_width(bhr_width)) id_ex
 	.funct3_in(funct3),
 	.funct7_in(funct7),
 	.pred_in(ifid_pred_sync),
+	.local_pred_in(ifid_localpred_sync),
+	.global_pred_in(ifid_globalpred_sync),
 	.bhr_in(ifid_bhr_sync),
 	.flush(misprediction | stall_lw),
 	.pc_out (idex_pc),
@@ -298,12 +316,26 @@ id_ex_reg #(.bhr_width(bhr_width)) id_ex
 	.btb_out_in(btb_out),
 	.btb_out_out(idex_btb_out),
 	.pred_out(idex_pred_state),
+	.local_pred_out(idex_local_pred),
+	.global_pred_out(idex_global_pred),
 	.bhr_out(idex_bhr)
 );
 
 /*
  * Execute
  */
+
+regfile regfile
+(
+    .clk,
+    .load(memwb_controlw.load_regfile),
+    .in(memwbmux_out),
+    .src_a(idex_controlw.rs1),
+    .src_b(idex_controlw.rs2),
+    .dest(memwb_controlw.rd),
+    .reg_a(rs1_out),
+    .reg_b(rs2_out)
+);
 
 forwarding_unit forward
 (
@@ -455,25 +487,10 @@ shifter shift_data
 
 mem_stall stall (.*);
 
-bht_stats branch_pred_stats
-(
-	.*,
-	.load(if_id_load)
-);
-
-cache_stats stats
-(
-    .*,
-    .instr_access(read_a),
-    .instr_resp(resp_a),
-    .data_access(read_b | write),
-    .data_resp(resp_b)
-);
-
 mem_wb_reg mem_wb
 (
 	.clk,
-	.load, //to be changed
+	.load,
 	.controlw_in (exmem_controlw),
 	.controlw_out(memwb_controlw),
 	.aluout_in(exmem_aluout),
@@ -504,6 +521,25 @@ mux8 memwb_mux
 	.g(),
 	.h(),
 	.q(memwbmux_out)
+);
+
+/*
+ * Counters
+ */
+
+bht_stats branch_pred_stats
+(
+	.*,
+	.load(if_id_load)
+);
+
+cache_stats stats
+(
+    .*,
+    .instr_access(read_a),
+    .instr_resp(resp_a),
+    .data_access(read_b | write),
+    .data_resp(resp_b)
 );
 
 endmodule
