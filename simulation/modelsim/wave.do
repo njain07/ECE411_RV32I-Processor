@@ -3,6 +3,7 @@ quietly WaveActivateNextPane {} 0
 add wave -noupdate /mp3_tb/clk
 add wave -noupdate /mp3_tb/dut/datapath/pc/out
 add wave -noupdate /mp3_tb/dut/datapath/pcmux/sel
+add wave -noupdate /mp3_tb/dut/datapath/take_branch
 add wave -noupdate -group mem_signals /mp3_tb/dut/datapath/resp_a
 add wave -noupdate -group mem_signals /mp3_tb/dut/datapath/resp_b
 add wave -noupdate -group mem_signals /mp3_tb/dut/datapath/rdata_a
@@ -259,7 +260,7 @@ add wave -noupdate -group {regfile
 } /mp3_tb/dut/datapath/regfile/reg_a
 add wave -noupdate -group {regfile
 } /mp3_tb/dut/datapath/regfile/reg_b
-add wave -noupdate -expand /mp3_tb/dut/datapath/regfile/data
+add wave -noupdate /mp3_tb/dut/datapath/regfile/data
 add wave -noupdate -group {fwd
 } /mp3_tb/dut/datapath/forward/idex_controlw
 add wave -noupdate -group {fwd
@@ -406,33 +407,31 @@ add wave -noupdate -group {pmem
 } /mp3_tb/pmem_wdata
 add wave -noupdate -group {pmem
 } /mp3_tb/pmem_rdata
-add wave -noupdate -group {predmux
+add wave -noupdate -expand -group {predmux
 } /mp3_tb/dut/datapath/predmux/sel
-add wave -noupdate -group {predmux
+add wave -noupdate -expand -group {predmux
 } /mp3_tb/dut/datapath/predmux/a
-add wave -noupdate -group {predmux
+add wave -noupdate -expand -group {predmux
 } /mp3_tb/dut/datapath/predmux/b
-add wave -noupdate -group {predmux
+add wave -noupdate -expand -group {predmux
 } /mp3_tb/dut/datapath/predmux/c
-add wave -noupdate -group {predmux
+add wave -noupdate -expand -group {predmux
 } /mp3_tb/dut/datapath/predmux/d
-add wave -noupdate -group {predmux
+add wave -noupdate -expand -group {predmux
 } /mp3_tb/dut/datapath/predmux/f
-add wave -noupdate -group {btb
+add wave -noupdate -expand -group {btb
 } /mp3_tb/dut/datapath/btb/clk
-add wave -noupdate -group {btb
+add wave -noupdate -expand -group {btb
 } /mp3_tb/dut/datapath/btb/load_btb
-add wave -noupdate -group {btb
+add wave -noupdate -expand -group {btb
 } /mp3_tb/dut/datapath/btb/target_addr
-add wave -noupdate -group {btb
+add wave -noupdate -expand -group {btb
 } /mp3_tb/dut/datapath/btb/idex_pc_value
-add wave -noupdate -group {btb
+add wave -noupdate -expand -group {btb
 } /mp3_tb/dut/datapath/btb/btb_out
-add wave -noupdate -group {btb
-} /mp3_tb/dut/datapath/btb/btb_load
-add wave -noupdate -group {btb
+add wave -noupdate -expand -group {btb
 } /mp3_tb/dut/datapath/btb/rindex
-add wave -noupdate -group {btb
+add wave -noupdate -expand -group {btb
 } /mp3_tb/dut/datapath/btb/windex
 add wave -noupdate -expand -group {bht
 } /mp3_tb/dut/datapath/local_bht/clk
@@ -501,19 +500,23 @@ add wave -noupdate -expand -group {bht_stats
 add wave -noupdate -expand -group {bht_stats
 } /mp3_tb/dut/datapath/branch_pred_stats/idex_controlw
 add wave -noupdate -expand -group {bht_stats
-} /mp3_tb/dut/datapath/branch_pred_stats/num_predictions
+} -radix decimal /mp3_tb/dut/datapath/branch_pred_stats/num_predictions
 add wave -noupdate -expand -group {bht_stats
-} /mp3_tb/dut/datapath/branch_pred_stats/num_mispredictions
-add wave -noupdate -expand -group {bht_stats
-} /mp3_tb/dut/datapath/branch_pred_stats/num_instr
-add wave -noupdate -expand -group {tourney} /mp3_tb/dut/datapath/tourney/clk
-add wave -noupdate -expand -group {tourney} /mp3_tb/dut/datapath/tourney/state
-add wave -noupdate -expand -group {tourney} /mp3_tb/dut/datapath/tourney/next_state
-add wave -noupdate -expand -group {tourney} /mp3_tb/dut/datapath/tourney/take_branch
-add wave -noupdate -expand -group {tourney} /mp3_tb/dut/datapath/tourney/local_correct
-add wave -noupdate -expand -group {tourney} /mp3_tb/dut/datapath/tourney/global_correct
+} -radix decimal /mp3_tb/dut/datapath/branch_pred_stats/num_mispredictions
+add wave -noupdate -expand -group {tourney
+} /mp3_tb/dut/datapath/tourney/clk
+add wave -noupdate -expand -group {tourney
+} /mp3_tb/dut/datapath/tourney/state
+add wave -noupdate -expand -group {tourney
+} /mp3_tb/dut/datapath/tourney/next_state
+add wave -noupdate -expand -group {tourney
+} /mp3_tb/dut/datapath/tourney/take_branch
+add wave -noupdate -expand -group {tourney
+} /mp3_tb/dut/datapath/tourney/local_correct
+add wave -noupdate -expand -group {tourney
+} /mp3_tb/dut/datapath/tourney/global_correct
 TreeUpdate [SetDefaultTree]
-WaveRestoreCursors {{Cursor 5} {927345000 ps} 0}
+WaveRestoreCursors {{Cursor 5} {0 ps} 0}
 quietly wave cursor active 1
 configure wave -namecolwidth 228
 configure wave -valuecolwidth 159
@@ -529,4 +532,4 @@ configure wave -griddelta 40
 configure wave -timeline 0
 configure wave -timelineunits ns
 update
-WaveRestoreZoom {927262968 ps} {927427032 ps}
+WaveRestoreZoom {0 ps} {164064 ps}

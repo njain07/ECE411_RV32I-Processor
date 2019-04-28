@@ -25,16 +25,17 @@ localparam bhr_width = 11;
 
 //Internal signals
 //IF
-logic predictor;
+logic predictor, take_branch;
 logic [31:0] pc_plus4, pcmux_out, pc_out, pc_sync_out, pc_4_sync, instr_mdr_out, nop, targ_addr;
 logic if_id_load;
 logic [1:0] predmux_sel, pred_sync, ifid_pred, ifid_pred_sync, pred, idex_local_pred, idex_global_pred, localpred_sync,
 			globalpred_sync, ifid_global_pred, ifid_local_pred,ifid_localpred_sync,ifid_globalpred_sync, local_prediction,global_prediction;
+
 //IF_ID
 logic [31:0] ifid_instr, ifid_pc, ifid_pc_4, ifid_pc_sync, ifid_pc4_sync;
 logic [bhr_width-1:0] bhr_out, bhr_sync, ifid_bhr, ifid_bhr_sync, idex_bhr;
 //ID
-rv32i_opcode opcode;
+rv32i_opcode opcode, if_opcode;
 logic [2:0] funct3;
 logic [6:0] funct7;
 logic [31:0] i_imm, s_imm, b_imm, u_imm, j_imm;
@@ -181,9 +182,12 @@ assign nop = 32'h00000000;
 
 assign if_id_load = load & ~stall_lw;
 
+assign if_opcode = rv32i_opcode'(rdata_a[6:0]);
+assign take_branch = (if_opcode == op_br || if_opcode == op_jal || if_opcode == op_jalr);
+
 mux2 pcmux
 (
-    .sel(prediction | misprediction),
+    .sel((take_branch & prediction) | misprediction),
     .a(pc_plus4),
     .b(targ_addr),
     .f(pcmux_out)

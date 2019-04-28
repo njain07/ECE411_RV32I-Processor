@@ -7,25 +7,23 @@ module bht_stats
     input logic                 misprediction,
     input rv32i_control_word    idex_controlw,
     output logic [31:0]         num_predictions,
-                                num_mispredictions,
-                                num_instr
+                                num_mispredictions
 );
 
 initial begin
     num_predictions = 0;
     num_mispredictions = 0;
-    num_instr = 0;
 end
 
 // assign num_correct = num_predictions - num_mispredictions;
 
 always_ff @(posedge clk) begin
     if (load) begin
-        num_instr <= num_instr + 1;
-        if(idex_controlw.jump || idex_controlw.branch)
+        if(idex_controlw.jump || idex_controlw.branch) begin
             num_predictions <= num_predictions + 1;
-        if(misprediction)
-            num_mispredictions <= num_mispredictions + 1;
+            if(misprediction)
+                num_mispredictions <= num_mispredictions + 1;
+        end
     end
 end
 

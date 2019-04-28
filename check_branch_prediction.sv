@@ -29,10 +29,11 @@ always_comb begin
           load_btb = 1;
           predmux_sel = 0;
         end
-    end else if (prediction & idex_controlw.opcode) begin
-        misprediction = 1;
-        predmux_sel = 2;
     end
+    // else if (prediction & idex_controlw.opcode) begin
+    //     misprediction = 1;
+    //     predmux_sel = 2;
+    // end
 
 end
 
