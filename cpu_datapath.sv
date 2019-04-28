@@ -25,9 +25,11 @@ localparam bhr_width = 11;
 
 //Internal signals
 //IF
+logic predictor;
 logic [31:0] pc_plus4, pcmux_out, pc_out, pc_sync_out, pc_4_sync, instr_mdr_out, nop, targ_addr;
 logic if_id_load;
-logic [1:0] predmux_sel, pred_sync, ifid_pred, ifid_pred_sync, pred;
+logic [1:0] predmux_sel, pred_sync, ifid_pred, ifid_pred_sync, pred, idex_local_pred, idex_global_pred, localpred_sync,
+			globalpred_sync, ifid_global_pred, ifid_local_pred,ifid_localpred_sync,ifid_globalpred_sync, local_prediction,global_prediction;
 //IF_ID
 logic [31:0] ifid_instr, ifid_pc, ifid_pc_4, ifid_pc_sync, ifid_pc4_sync;
 logic [bhr_width-1:0] bhr_out, bhr_sync, ifid_bhr, ifid_bhr_sync, idex_bhr;
@@ -141,7 +143,7 @@ tournament_predictor tourney
 	.global_prediction(idex_global_pred[1])
 );
 
-mux2 tournament_mux
+mux2 #(.width(2)) tournament_mux
 (
 	.sel(predictor),
 	.a(local_prediction),

@@ -10,19 +10,18 @@ module tournament_predictor
 	output logic 				predictor
 );
 
+logic [1:0] state, next_state;
+logic take_branch, local_correct, global_correct;
+
 initial
 begin
 	state = 2'b01;
 end
 
-
-logic [1:0] state, next_state;
-logic take_branch, local_correct, global_correct;
-
 always_comb begin
 	take_branch = idex_controlw.branch & br_en | idex_controlw.jump;
 	local_correct = (local_prediction == take_branch);
-	global_correct = (global_correct == take_branch);
+	global_correct = (global_prediction == take_branch);
 	predictor = state[1];
     case(state)
       2'b00 : begin

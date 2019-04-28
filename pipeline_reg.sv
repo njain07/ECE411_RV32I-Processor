@@ -173,7 +173,7 @@ logic [2:0] funct3;
 logic [6:0] funct7;
 logic [31:0] pc, pc_plus_4, i_imm;
 logic [31:0] s_imm, b_imm, u_imm, j_imm, rs1out, rs2out, btb_out;
-logic [1:0]  pred;
+logic [1:0]  pred, local_pred, global_pred;
 logic [bhr_width-1:0] bhr;
 
 initial
