@@ -36,7 +36,7 @@ always #5 clk = ~clk;
 
 assign registers = dut.datapath.regfile.data;
 //assign halt = dut.datapath.load_pc & (dut.datapath.pc_out == dut.datapath.pcmux_out);
-assign halt = (dut.datapath.pc_out == dut.datapath.pcmux_out);
+assign halt = dut.datapath.if_id_load & (dut.datapath.pc_out == dut.datapath.pcmux_out);
 
 always @(posedge clk)
 begin
@@ -49,7 +49,7 @@ begin
     //     write_data = 32'hx;
     //     write = 0;
     // end
-    // if (halt) $finish;
+    if (halt) $finish;
     // if (dut.load_pc) order = order + 1;
 end
 

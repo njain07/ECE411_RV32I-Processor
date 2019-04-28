@@ -36,13 +36,16 @@ always_comb begin
       end
 
       2'b10 : begin
-        if(global_correct) next_state = 2'b11;
-        else if (~global_correct & local_correct) next_state = 2'b01;
+        // if(global_correct) next_state = 2'b11;
+        // else if (~global_correct & local_correct) next_state = 2'b01;
+		if (~global_correct) next_state = 2'b01;
+		else if (global_correct & ~local_correct) next_state = 2'b11;
         else next_state = 2'b10;
       end
 
       2'b11 : begin
-        if(~global_correct & local_correct) next_state = 2'b10;
+        // if(~global_correct & local_correct) next_state = 2'b10;
+		if (~global_correct) next_state = 2'b10;
         else next_state = 2'b11;
       end
     endcase
