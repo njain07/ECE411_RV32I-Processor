@@ -119,7 +119,7 @@ branch_predictor #(.s_index(bhr_width)) global_pht
 	.jump(idex_controlw.jump),
 	.branch(idex_controlw.branch),
 	.load_bht(if_id_load),
-	.idex_pred_state,
+	.idex_pred_state(idex_global_pred),
 	.pred(global_prediction)
 );
 
@@ -132,7 +132,7 @@ branch_predictor #(.s_index(bhr_width)) local_bht
 	.jump(idex_controlw.jump),
 	.branch(idex_controlw.branch),
 	.load_bht(if_id_load),
-	.idex_pred_state,
+	.idex_pred_state(idex_local_pred),
 	.pred(local_prediction)
 );
 

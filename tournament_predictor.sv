@@ -25,24 +25,24 @@ always_comb begin
 	predictor = state[1];
     case(state)
       2'b00 : begin
-        if(~local_correct) next_state = 2'b01;
+        if(~local_correct && global_correct) next_state = 2'b01;
         else next_state = 2'b00;
       end
 
       2'b01 : begin
-        if(global_correct & ~local_correct) next_state = 2'b10;
-        else if (local_correct & ~global_correct) next_state = 2'b00;
+        if(local_correct) next_state = 2'b00;
+        else if (global_correct & ~local_correct) next_state = 2'b10;
         else next_state = 2'b01;
       end
 
       2'b10 : begin
-        if(global_correct & ~local_correct) next_state = 2'b11;
-        else if (local_correct & ~global_correct) next_state = 2'b01;
+        if(global_correct) next_state = 2'b11;
+        else if (~global_correct & local_correct) next_state = 2'b01;
         else next_state = 2'b10;
       end
 
       2'b11 : begin
-        if(~global_correct) next_state = 2'b10;
+        if(~global_correct && local_correct) next_state = 2'b10;
         else next_state = 2'b11;
       end
     endcase

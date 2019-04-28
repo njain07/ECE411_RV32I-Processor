@@ -107,7 +107,7 @@ end
 always_comb
 begin
     pc_out = pc;
-    pc_4_out = pc;
+    pc_4_out = pc_4;
     pred_out = pred;
     local_pred_out = local_pred;
     global_pred_out = global_pred;
