@@ -23,7 +23,7 @@ always_comb begin
 	take_branch = idex_controlw.branch & br_en | idex_controlw.jump;
 	local_correct = (local_prediction == take_branch);
 	global_correct = (global_correct == take_branch);
-
+	predictor = state[1];
     case(state)
       2'b00 : begin
         if(~local_correct) next_state = 2'b01;
