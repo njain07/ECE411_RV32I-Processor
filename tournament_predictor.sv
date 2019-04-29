@@ -15,7 +15,7 @@ logic take_branch, local_correct, global_correct;
 
 initial
 begin
-	state = 2'b01;
+	state = 2'b10;
 end
 
 always_comb begin
@@ -23,6 +23,7 @@ always_comb begin
 	local_correct = (local_prediction == take_branch);
 	global_correct = (global_prediction == take_branch);
 	predictor = state[1];
+	next_state = state;
     case(state)
       2'b00 : begin
         if(~local_correct & global_correct) next_state = 2'b01;
@@ -36,16 +37,13 @@ always_comb begin
       end
 
       2'b10 : begin
-        // if(global_correct) next_state = 2'b11;
-        // else if (~global_correct & local_correct) next_state = 2'b01;
-		if (~global_correct) next_state = 2'b01;
-		else if (global_correct & ~local_correct) next_state = 2'b11;
+        if(global_correct) next_state = 2'b11;
+        else if (~global_correct & local_correct) next_state = 2'b01;
         else next_state = 2'b10;
       end
 
       2'b11 : begin
-        // if(~global_correct & local_correct) next_state = 2'b10;
-		if (~global_correct) next_state = 2'b10;
+        if(~global_correct & local_correct) next_state = 2'b10;
         else next_state = 2'b11;
       end
     endcase
